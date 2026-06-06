@@ -1,0 +1,2713 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bolão da Copa 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1419; --bg-2: #1a2028; --panel: #1e252e; --panel-2: #262e38;
+    --border: #2f3845; --ink: #ffffff; --ink-dim: #8b95a3;
+    --red: #e8264c; --green: #00b15f; --blue: #0066ff; --gold: #ffc72c;
+    --gradient-fifa: linear-gradient(135deg, #e8264c 0%, #ffc72c 50%, #00b15f 100%);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bg); color: var(--ink); font-family: 'Archivo', sans-serif; min-height: 100vh; }
+  body {
+    background-image:
+      radial-gradient(circle at 0% 0%, rgba(232,38,76,0.08), transparent 40%),
+      radial-gradient(circle at 100% 0%, rgba(0,177,95,0.06), transparent 40%),
+      radial-gradient(circle at 50% 100%, rgba(0,102,255,0.05), transparent 50%);
+    background-attachment: fixed;
+  }
+
+  header {
+    border-bottom: 1px solid var(--border); padding: 14px 20px;
+    display: flex; justify-content: space-between; align-items: center;
+    background: rgba(15,20,25,0.95); backdrop-filter: blur(12px);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .logo {
+    font-family: 'Archivo Black', sans-serif; font-size: 18px;
+    display: flex; align-items: center; gap: 10px; text-transform: uppercase;
+  }
+  .logo-mark {
+    width: 28px; height: 28px; background: var(--gradient-fifa);
+    clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+  }
+  .logo .yr { color: var(--gold); }
+  .user-tag { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--ink-dim); }
+  .avatar {
+    width: 32px; height: 32px; background: var(--gradient-fifa); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 900; color: var(--bg); font-size: 13px;
+  }
+  .logout-btn {
+    background: none; border: 1px solid var(--border); color: var(--ink-dim);
+    padding: 4px 8px; font-size: 10px; cursor: pointer; font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.5px; text-transform: uppercase;
+  }
+
+  nav.tabs {
+    display: flex; overflow-x: auto; border-bottom: 1px solid var(--border);
+    background: var(--bg); position: sticky; top: 60px; z-index: 50; scrollbar-width: none;
+  }
+  nav.tabs::-webkit-scrollbar { display: none; }
+  nav.tabs button {
+    background: none; border: none; color: var(--ink-dim); padding: 14px 18px;
+    font-family: 'Archivo Black', sans-serif; font-size: 12px; cursor: pointer;
+    white-space: nowrap; border-bottom: 3px solid transparent;
+    transition: all 0.2s; text-transform: uppercase;
+  }
+  nav.tabs button.active { color: var(--ink); border-bottom-color: var(--red); }
+
+  main { padding: 24px 20px 100px; max-width: 800px; margin: 0 auto; }
+  .screen { display: none; animation: fadeIn 0.3s ease; }
+  .screen.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  h1.screen-title {
+    font-family: 'Archivo Black', sans-serif; font-size: 36px;
+    letter-spacing: -1px; margin-bottom: 4px; line-height: 1; text-transform: uppercase;
+  }
+  h1.screen-title .accent { color: var(--gold); }
+  .screen-sub {
+    color: var(--ink-dim); font-size: 11px; margin-bottom: 24px;
+    font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 1px;
+  }
+
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-bottom: 20px; }
+
+  /* Dashboard: avisos críticos */
+  .dashboard-avisos { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+  .aviso-card {
+    display: grid; grid-template-columns: 32px 1fr auto; gap: 12px; align-items: center;
+    padding: 12px 14px; background: var(--panel); border: 1px solid var(--border);
+    border-left-width: 4px;
+  }
+  .aviso-card.urgente { border-left-color: var(--red); background: rgba(232,38,76,0.06); }
+  .aviso-card.aviso { border-left-color: var(--gold); background: rgba(255,199,44,0.05); }
+  .aviso-card.info { border-left-color: var(--blue); background: rgba(0,90,164,0.05); }
+  .aviso-icone { font-size: 24px; text-align: center; }
+  .aviso-corpo { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .aviso-titulo {
+    font-family: 'Archivo Black', sans-serif; font-size: 13px; letter-spacing: 0.5px;
+    color: var(--ink);
+  }
+  .aviso-card.urgente .aviso-titulo { color: var(--red); }
+  .aviso-card.aviso .aviso-titulo { color: var(--gold); }
+  .aviso-card.info .aviso-titulo { color: var(--blue); }
+  .aviso-texto {
+    font-size: 11px; color: var(--ink-dim); line-height: 1.4;
+  }
+  .aviso-botao {
+    background: var(--ink); color: var(--bg); border: none;
+    padding: 8px 12px; font-size: 11px; font-weight: 700;
+    font-family: 'JetBrains Mono', monospace; letter-spacing: 0.3px;
+    cursor: pointer; white-space: nowrap;
+  }
+  .aviso-botao:hover { background: var(--gold); }
+  @media (max-width: 600px) {
+    .aviso-card { grid-template-columns: 28px 1fr; }
+    .aviso-botao { grid-column: 1 / -1; margin-top: 4px; }
+  }
+
+  /* Dashboard: ranking mini */
+  .dashboard-ranking-mini {
+    background: var(--panel); border: 1px solid var(--border); padding: 4px;
+  }
+  .ranking-mini-row {
+    display: grid; grid-template-columns: 40px 1fr auto; align-items: center; gap: 10px;
+    padding: 10px 12px; border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .ranking-mini-row:last-child { border-bottom: none; }
+  .ranking-mini-row.me { background: rgba(255,199,44,0.06); }
+  .ranking-mini-row-divisor { border-top: 2px dashed var(--border); margin-top: 4px; }
+  .ranking-mini-pos {
+    font-family: 'Archivo Black', sans-serif; font-size: 14px; text-align: center;
+    color: var(--ink-dim);
+  }
+  .ranking-mini-pos.pos-1 { color: var(--gold); }
+  .ranking-mini-pos.pos-2 { color: #b8b8b8; }
+  .ranking-mini-pos.pos-3 { color: #cd7f32; }
+  .ranking-mini-nome { font-weight: 600; color: var(--ink); }
+  .ranking-mini-pts {
+    font-family: 'JetBrains Mono', monospace; font-weight: 700;
+    color: var(--ink);
+  }
+  .stat-card { background: var(--panel); border: 1px solid var(--border); padding: 16px; position: relative; }
+  .stat-card.featured {
+    grid-column: 1 / -1;
+    background: linear-gradient(135deg, var(--panel) 0%, rgba(232,38,76,0.15) 100%);
+    border-color: var(--red);
+  }
+  .stat-card::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: var(--gradient-fifa);
+  }
+  .stat-label {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ink-dim);
+    text-transform: uppercase; margin-bottom: 8px;
+  }
+  .stat-value { font-family: 'Archivo Black', sans-serif; font-size: 36px; line-height: 1; }
+  .stat-value.huge { font-size: 52px; color: var(--gold); }
+  .stat-value.pos::before { content: "#"; color: var(--red); }
+  .stat-meta { font-size: 11px; color: var(--ink-dim); margin-top: 6px; font-family: 'JetBrains Mono', monospace; }
+
+  .phase-header {
+    font-family: 'Archivo Black', sans-serif; font-size: 18px; margin: 28px 0 12px;
+    display: flex; align-items: center; gap: 10px; text-transform: uppercase;
+  }
+  .phase-header::before { content: ""; width: 6px; height: 18px; background: var(--gradient-fifa); }
+  .phase-header .meta {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ink-dim);
+    margin-left: auto; font-weight: 400;
+  }
+
+  .match-card { background: var(--panel); border: 1px solid var(--border); padding: 14px; margin-bottom: 6px; position: relative; }
+  .match-card.locked { opacity: 0.55; }
+  .match-card.live-card { border-color: var(--red); }
+  .match-meta {
+    display: flex; justify-content: space-between; font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; color: var(--ink-dim); margin-bottom: 10px; text-transform: uppercase;
+  }
+  .match-meta .live-now { color: var(--red); font-weight: 700; }
+  .match-row { display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: center; }
+  .team-side { display: flex; align-items: center; gap: 8px; min-width: 0; }
+  .team-side.right { justify-content: flex-end; }
+  .team-flag-sm { font-size: 22px; flex-shrink: 0; }
+  .flag-img {
+    width: 28px; height: 20px;
+    object-fit: cover;
+    border-radius: 2px;
+    flex-shrink: 0;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    display: inline-block;
+    vertical-align: middle;
+  }
+  .flag-fallback {
+    width: 28px; height: 20px;
+    background: var(--panel-2);
+    border-radius: 2px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--ink-dim);
+    flex-shrink: 0;
+  }
+  .team-label-sm {
+    font-family: 'Archivo Black', sans-serif; font-size: 13px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .score-block { display: flex; align-items: center; gap: 4px; justify-content: center; }
+  .score-input {
+    width: 34px; height: 34px; background: var(--bg); border: 1px solid var(--border);
+    color: var(--gold); text-align: center; font-family: 'Archivo Black', sans-serif;
+    font-size: 18px;
+  }
+  .score-input:focus { outline: none; border-color: var(--gold); background: var(--panel-2); }
+  .score-input:disabled { color: var(--ink-dim); background: var(--panel-2); }
+  .score-x { color: var(--ink-dim); font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+  .result-line {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ink-dim);
+    margin-top: 8px; text-align: center;
+  }
+  .result-line .pts { color: var(--green); font-weight: 700; }
+  .result-line .pts.exact { color: var(--gold); }
+
+  .group-card { background: var(--panel); border: 1px solid var(--border); margin-bottom: 16px; overflow: hidden; }
+  .group-title {
+    background: var(--panel-2); padding: 10px 14px;
+    font-family: 'Archivo Black', sans-serif; font-size: 13px;
+  }
+  table.standings { width: 100%; border-collapse: collapse; font-size: 12px; }
+  table.standings th {
+    text-align: left; padding: 8px 10px; font-family: 'JetBrains Mono', monospace;
+    font-size: 9px; color: var(--ink-dim); border-bottom: 1px solid var(--border); font-weight: 400;
+  }
+  table.standings th.num { text-align: center; }
+  table.standings td { padding: 8px 10px; border-bottom: 1px solid var(--border); }
+  table.standings td.num { text-align: center; font-family: 'JetBrains Mono', monospace; }
+  table.standings tr:last-child td { border-bottom: none; }
+  .pos-badge {
+    display: inline-block; width: 18px; height: 18px; border-radius: 50%;
+    text-align: center; line-height: 18px; font-size: 10px;
+    font-family: 'Archivo Black', sans-serif; margin-right: 6px;
+  }
+  .pos-badge.q1, .pos-badge.q2 { background: var(--green); color: white; }
+  .pos-badge.q3 { background: var(--gold); color: var(--bg); }
+  .pos-badge.out { background: var(--border); color: var(--ink-dim); }
+  .team-cell { display: flex; align-items: center; gap: 6px; }
+  .pts-cell { font-family: 'Archivo Black', sans-serif; color: var(--gold); }
+
+  .ranking-row {
+    display: grid; grid-template-columns: 36px 1fr auto;
+    align-items: center; padding: 12px 14px; background: var(--panel);
+    border: 1px solid var(--border); margin-bottom: 4px; gap: 12px;
+  }
+  .ranking-row.you {
+    border-color: var(--gold);
+    background: linear-gradient(90deg, rgba(255,199,44,0.1), var(--panel));
+  }
+  .rank-pos { font-family: 'Archivo Black', sans-serif; font-size: 22px; color: var(--ink-dim); }
+  .ranking-row:nth-child(1) .rank-pos { color: var(--gold); }
+  .ranking-row:nth-child(2) .rank-pos { color: #c0c0c0; }
+  .ranking-row:nth-child(3) .rank-pos { color: #cd7f32; }
+  .rank-name { font-weight: 700; font-size: 13px; }
+  .rank-dept { font-size: 10px; color: var(--ink-dim); font-family: 'JetBrains Mono', monospace; text-transform: uppercase; }
+  .rank-pts { font-family: 'Archivo Black', sans-serif; font-size: 22px; color: var(--gold); }
+  .rank-pts small {
+    font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--ink-dim);
+    display: block; text-align: right;
+  }
+
+  .special-card { background: var(--panel); border: 1px solid var(--border); padding: 18px; margin-bottom: 12px; }
+  .special-icon { font-size: 32px; margin-bottom: 8px; }
+  .special-label { font-family: 'Archivo Black', sans-serif; font-size: 16px; text-transform: uppercase; margin-bottom: 4px; }
+  .special-pts { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--gold); margin-bottom: 12px; }
+  .special-card select, .special-card input {
+    width: 100%; padding: 12px; background: var(--bg); border: 1px solid var(--border);
+    color: var(--ink); font-family: 'Archivo', sans-serif; font-size: 14px;
+  }
+
+  .save-fab {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+    background: var(--gradient-fifa); color: var(--bg); border: none;
+    padding: 14px 32px; font-family: 'Archivo Black', sans-serif; font-size: 14px;
+    cursor: pointer; box-shadow: 0 8px 24px rgba(255,199,44,0.3); z-index: 80; text-transform: uppercase;
+  }
+  .save-fab:disabled { opacity: 0.5; cursor: wait; }
+
+  /* Bracket styles */
+  .bracket-status {
+    padding: 12px 14px; margin-bottom: 16px; font-size: 12px;
+    font-family: 'JetBrains Mono', monospace; letter-spacing: 0.3px; border-left: 3px solid;
+  }
+  .bracket-status.open.f1 { background: rgba(0,177,95,0.08); border-color: var(--green); color: var(--green); }
+  .bracket-status.open.f2 { background: rgba(255,199,44,0.08); border-color: var(--gold); color: var(--gold); }
+  .bracket-status.closed { background: rgba(232,38,76,0.08); border-color: var(--red); color: var(--red); }
+
+  .bracket-legend {
+    background: var(--panel); border: 1px solid var(--border); padding: 12px 14px;
+    margin-bottom: 16px; font-size: 12px; line-height: 1.5;
+  }
+
+  .bracket-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 10px; margin-bottom: 20px;
+  }
+  .bracket-match {
+    background: var(--panel); border: 1px solid var(--border);
+    padding: 10px 12px; position: relative;
+  }
+  .bracket-meta {
+    font-size: 10px; color: var(--ink-dim); font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.5px; margin-bottom: 6px;
+  }
+  .bracket-row {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 4px;
+  }
+  .bracket-row:last-child { margin-bottom: 0; }
+  /* F1 sem input de placar — botão ocupa linha inteira */
+  .bracket-row.f1-row .bracket-team { width: 100%; }
+  .bracket-team {
+    flex: 1; display: flex; align-items: center; gap: 8px;
+    background: transparent; border: 1px solid var(--border); color: var(--ink);
+    padding: 8px 10px; cursor: pointer; text-align: left; font-family: inherit;
+    transition: all 0.15s;
+  }
+  .bracket-team:hover:not(:disabled) { border-color: var(--gold); background: rgba(255,199,44,0.06); }
+  .bracket-team.winner {
+    background: rgba(0,177,95,0.18); border-color: var(--green); color: var(--green);
+    font-weight: 700;
+  }
+  .bracket-team.placeholder {
+    background: rgba(255,255,255,0.02); border-style: dashed; cursor: not-allowed;
+    color: var(--ink-dim); font-style: italic;
+  }
+  /* F2: time onde o usuário acertou na F1 (mas ainda não escolheu vencedor) — fundo verde sutil */
+  .bracket-team.f1-correct {
+    background: rgba(0,177,95,0.08); border-color: rgba(0,177,95,0.4);
+  }
+  .bracket-team.f1-correct:hover:not(:disabled) {
+    background: rgba(0,177,95,0.15); border-color: var(--green);
+  }
+  .bracket-bonus-badge {
+    display: inline-block; font-size: 9px; font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.5px; padding: 2px 6px; margin-left: 6px; border: 1px solid;
+  }
+  .bracket-bonus-badge.acertou { color: var(--gold); border-color: var(--gold); background: rgba(255,199,44,0.08); }
+  .bracket-bonus-badge.errou { color: var(--red); border-color: var(--red); background: rgba(232,38,76,0.08); opacity: 0.7; }
+  .bracket-team:disabled { cursor: not-allowed; }
+  .bracket-team-name { font-size: 12px; flex: 1; }
+  .bracket-team-name .resolved-mark {
+    display: inline-block; color: var(--gold); font-size: 11px; margin-left: 2px;
+  }
+  .bracket-f1-ref {
+    display: flex; align-items: center; gap: 6px; margin-top: 8px; padding-top: 6px;
+    border-top: 1px dashed var(--border); font-size: 10px;
+    font-family: 'JetBrains Mono', monospace; letter-spacing: 0.3px;
+  }
+  .bracket-f1-label { color: var(--gold); font-weight: 700; }
+  .bracket-score {
+    width: 42px; padding: 8px 4px; text-align: center;
+    background: var(--bg); border: 1px solid var(--border); color: var(--ink);
+    font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 700;
+  }
+  .bracket-score:focus { outline: none; border-color: var(--gold); }
+  .bracket-score:disabled { opacity: 0.5; }
+
+  /* ====== GRUPOS LADO A LADO ====== */
+  .group-compare {
+    margin-bottom: 18px; background: var(--panel); border: 1px solid var(--border);
+  }
+  .group-compare-title {
+    padding: 10px 14px; font-family: 'Archivo Black', sans-serif; font-size: 13px;
+    background: var(--bg-elev); border-bottom: 1px solid var(--border);
+    text-transform: uppercase; letter-spacing: 1px;
+  }
+  .group-compare-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border);
+  }
+  .group-compare-col { background: var(--panel); padding: 10px; }
+  .group-compare-sublabel {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 1px;
+    padding: 4px 6px; margin-bottom: 8px; text-align: center;
+    border: 1px solid; display: inline-block; width: 100%;
+  }
+  .group-compare-sublabel.real { color: var(--green); border-color: var(--green); background: rgba(0,177,95,0.06); }
+  .group-compare-sublabel.palpite { color: var(--gold); border-color: var(--gold); background: rgba(255,199,44,0.06); }
+  .group-compare-empty {
+    padding: 20px 10px; text-align: center; color: var(--ink-dim);
+    font-size: 11px; font-style: italic;
+  }
+  /* Em telas estreitas, empilha vertical (real em cima, palpite embaixo) */
+  @media (max-width: 720px) {
+    .group-compare-grid { grid-template-columns: 1fr; }
+  }
+  /* Em mobile, reduz tamanho da tabela */
+  @media (max-width: 480px) {
+    .group-compare .standings { font-size: 11px; }
+    .group-compare .standings th, .group-compare .standings td { padding: 4px 3px; }
+    .group-compare .pos-badge { width: 16px; height: 16px; font-size: 10px; }
+  }
+
+  /* ====== LISTA DE MEUS PALPITES ====== */
+  .palpite-row {
+    display: grid; grid-template-columns: 64px 1fr 130px; gap: 10px; align-items: center;
+    background: var(--panel); border: 1px solid var(--border);
+    padding: 10px 12px; margin-bottom: 4px; position: relative;
+  }
+  .palpite-row.acerto-exato { border-left: 3px solid var(--gold); }
+  .palpite-row.acerto-parcial { border-left: 3px solid var(--green); }
+  .palpite-row.acerto-erro { border-left: 3px solid var(--red); opacity: 0.7; }
+
+  /* Meus Palpites: seções F1/F2 visualmente distintas */
+  .meus-palpites-secao {
+    margin-top: 28px; padding: 14px 12px 4px;
+    background: rgba(255,255,255,0.015); border: 1px solid var(--border);
+    border-radius: 4px;
+  }
+  .meus-palpites-titulo {
+    font-family: 'Archivo Black', sans-serif; font-size: 15px; letter-spacing: 1px;
+    display: flex; align-items: center; gap: 8px; margin-bottom: 4px;
+  }
+  .meus-palpites-titulo.f1 {
+    color: var(--gold);
+    border-left: 4px solid var(--gold); padding-left: 10px;
+  }
+  .meus-palpites-titulo.f2 {
+    color: var(--green);
+    border-left: 4px solid var(--green); padding-left: 10px;
+  }
+  .meus-palpites-titulo-tag { font-size: 18px; }
+  .meus-palpites-subtitulo {
+    font-size: 11px; color: var(--ink-dim); font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.3px; margin-bottom: 14px; padding-left: 14px;
+  }
+  .meus-palpites-banner {
+    padding: 10px 12px; margin-bottom: 14px; font-size: 12px;
+    background: rgba(0,90,164,0.08); border-left: 3px solid var(--blue);
+    color: var(--ink-dim);
+  }
+  .meus-palpites-banner.f2-vazia {
+    background: rgba(255,199,44,0.06); border-left-color: var(--gold);
+  }
+  .meus-palpites-vazio {
+    padding: 18px; text-align: center; color: var(--ink-dim);
+    font-size: 12px; font-style: italic;
+    background: rgba(255,255,255,0.02); border: 1px dashed var(--border);
+  }
+
+  .palpite-data {
+    display: flex; flex-direction: column; gap: 2px;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  }
+  .palpite-times {
+    display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px;
+  }
+  .palpite-time-side {
+    display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600;
+  }
+  .palpite-time-side.right { justify-content: flex-end; }
+  .palpite-placar {
+    background: var(--bg-elev); padding: 4px 10px; min-width: 60px; text-align: center;
+    font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700;
+    border: 1px solid var(--border);
+  }
+  .palpite-placar.live { color: var(--red); border-color: var(--red); animation: pulse 1.5s ease infinite; }
+  .palpite-meu {
+    text-align: right; border-left: 1px solid var(--border); padding-left: 10px;
+  }
+  .palpite-meu-label {
+    font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--ink-dim);
+    letter-spacing: 0.8px;
+  }
+  .palpite-meu-valor {
+    font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700;
+    color: var(--gold); margin-top: 2px;
+  }
+  .palpite-meu-valor.vazio { color: var(--ink-dim); font-style: italic; font-weight: 400; font-size: 11px; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+
+  @media (max-width: 600px) {
+    .palpite-row { grid-template-columns: 50px 1fr; grid-template-rows: auto auto; }
+    .palpite-meu { grid-column: 1 / -1; text-align: left; border-left: none;
+                   border-top: 1px solid var(--border); padding-left: 0; padding-top: 6px;
+                   display: flex; align-items: center; justify-content: space-between; }
+    .palpite-meu-valor { margin-top: 0; }
+  }
+
+  .toast {
+    position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+    background: var(--green); color: white; padding: 10px 20px;
+    font-family: 'Archivo Black', sans-serif; font-size: 12px;
+    z-index: 200; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    animation: slideDown 0.3s ease;
+  }
+  .toast.error { background: var(--red); }
+  @keyframes slideDown { from { transform: translate(-50%, -100%); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+
+  .login-bg {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    padding: 20px; position: relative; overflow: hidden;
+  }
+  .login-bg::before {
+    content: ""; position: absolute; inset: -50%;
+    background:
+      radial-gradient(circle at 20% 30%, rgba(232,38,76,0.3), transparent 40%),
+      radial-gradient(circle at 80% 70%, rgba(0,177,95,0.25), transparent 40%),
+      radial-gradient(circle at 50% 100%, rgba(0,102,255,0.2), transparent 50%);
+    z-index: 0;
+  }
+  .login-box { max-width: 360px; width: 100%; text-align: center; position: relative; z-index: 1; }
+  .login-mark {
+    width: 80px; height: 80px; background: var(--gradient-fifa);
+    clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+    margin: 0 auto 24px;
+  }
+  .login-box h1 {
+    font-family: 'Archivo Black', sans-serif; font-size: 44px;
+    letter-spacing: -1.5px; line-height: 0.95; margin-bottom: 6px; text-transform: uppercase;
+  }
+  .login-box h1 .y { color: var(--gold); }
+  .login-box .tagline {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    color: var(--ink-dim); letter-spacing: 2px; margin-bottom: 40px; text-transform: uppercase;
+  }
+  .login-box input {
+    width: 100%; padding: 14px; background: rgba(30,37,46,0.8); backdrop-filter: blur(10px);
+    border: 1px solid var(--border); color: var(--ink); font-family: 'Archivo', sans-serif;
+    font-size: 14px; margin-bottom: 8px;
+  }
+  .login-box button {
+    width: 100%; padding: 14px; background: var(--gradient-fifa); color: var(--bg);
+    border: none; font-family: 'Archivo Black', sans-serif; font-size: 16px;
+    cursor: pointer; margin-top: 10px; text-transform: uppercase;
+  }
+  .login-error { color: var(--red); font-size: 12px; margin-top: 12px; font-family: 'JetBrains Mono', monospace; }
+
+  .loading {
+    text-align: center; padding: 40px 20px; color: var(--ink-dim);
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+  }
+  .empty {
+    text-align: center; padding: 40px 20px; color: var(--ink-dim);
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  }
+
+  .rule-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .rule-row:last-child { border-bottom: none; }
+  .rule-pts { font-family: 'Archivo Black', sans-serif; font-size: 22px; color: var(--gold); }
+  .rules-section { background: var(--panel); border: 1px solid var(--border); padding: 4px 18px; margin-bottom: 16px; }
+</style>
+</head>
+<body>
+
+<!-- ====================================================== -->
+<!-- LOGIN -->
+<!-- ====================================================== -->
+<div id="login" class="screen active">
+  <div class="login-bg">
+    <div class="login-box">
+      <div class="login-mark"></div>
+      <h1>BOLÃO<br><span class="y">2026</span></h1>
+      <div class="tagline">CAN · MEX · USA</div>
+      <input type="email" placeholder="Seu email corporativo" id="login-email" autocomplete="email">
+      <button id="login-btn" onclick="doLogin()">Entrar no Bolão</button>
+      <div class="login-error" id="login-error"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ====================================================== -->
+<!-- APP -->
+<!-- ====================================================== -->
+<div id="app" style="display:none;">
+  <header>
+    <div class="logo">
+      <div class="logo-mark"></div>
+      BOLÃO <span class="yr">26</span>
+    </div>
+    <div class="user-tag">
+      <span id="user-name">—</span>
+      <div class="avatar" id="user-avatar">?</div>
+      <button class="logout-btn" onclick="doLogout()">Sair</button>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="dashboard">Início</button>
+    <button class="tab-btn" data-tab="palpites">Palpites Fase de Grupos</button>
+    <button class="tab-btn" data-tab="bracketF1">Palpite Antecipado</button>
+    <button class="tab-btn" data-tab="bracketF2">Palpite Oficial</button>
+    <button class="tab-btn" data-tab="especiais">Artilheiro</button>
+    <button class="tab-btn" data-tab="grupos">Grupos</button>
+    <button class="tab-btn" data-tab="meuspalpites">Meus Palpites</button>
+    <button class="tab-btn" data-tab="ranking">Ranking</button>
+    <button class="tab-btn" data-tab="regras">Regras</button>
+  </nav>
+
+  <main>
+    <section id="dashboard" class="screen active"><div class="loading">Carregando…</div></section>
+    <section id="palpites" class="screen"><div class="loading">Selecione a aba</div></section>
+    <section id="bracketF1" class="screen"><div class="loading">Selecione a aba</div></section>
+    <section id="bracketF2" class="screen"><div class="loading">Selecione a aba</div></section>
+    <section id="especiais" class="screen"><div class="loading">Selecione a aba</div></section>
+    <section id="grupos" class="screen"><div class="loading">Selecione a aba</div></section>
+    <section id="meuspalpites" class="screen"><div class="loading">Selecione a aba</div></section>
+    <section id="ranking" class="screen"><div class="loading">Selecione a aba</div></section>
+    <section id="regras" class="screen">
+      <h1 class="screen-title">REGRAS</h1>
+      <div class="screen-sub">COMO FUNCIONA A PONTUAÇÃO</div>
+
+      <div style="background:var(--panel-2);border-left:3px solid var(--gold);padding:14px 16px;margin-bottom:24px;font-size:13px;line-height:1.6;color:var(--ink);">
+        <strong style="color:var(--gold);font-family:'Archivo Black',sans-serif;font-size:14px;">⚡ COMO O BOLÃO FUNCIONA — DOIS PALPITES DE MATA-MATA</strong>
+        <br><br>
+        <strong>🔮 PALPITE ANTECIPADO (antes da Copa, até 11/jun):</strong>
+        <br>Você palpita TUDO — placares dos 72 jogos da fase de grupos, mata-mata inteiro (até a Final) escolhendo só os vencedores, e os palpites especiais (artilheiro).
+        <br>No mata-mata, o app já pré-preenche os confrontos do Round of 32 baseado nos seus palpites de grupos (quem você acha que vai ser 1º, 2º e 3º).
+        <br><br>
+        <strong>⚡ PALPITE OFICIAL (após fim dos grupos, ~27/jun):</strong>
+        <br>Abre uma janela curta (~24h) pra você refazer o mata-mata, agora sabendo quem realmente classificou. Aqui você palpita os PLACARES também. Pode editar várias vezes durante a janela — seu Palpite Antecipado fica preservado como referência.
+        <br><br>
+        <strong>🎁 BÔNUS ANTECIPADO — o pulo do gato:</strong>
+        <br>Cada confronto do mata-mata que você ACERTOU lá no Palpite Antecipado (ainda antes da Copa começar) dá pontos EXTRAS, escalonados por fase. Quem cravou um confronto desde o início ganha mais que quem só ajustou no Oficial.
+        <br><br>
+        <span style="font-size:12px;color:var(--ink-dim);">📊 No final, vale: <strong>placar</strong> pelo Palpite Oficial + <strong>bônus de confronto</strong> sempre pelo Palpite Antecipado original.</span>
+      </div>
+
+      <div class="phase-header">⚽ JOGOS DA FASE DE GRUPOS</div>
+      <div class="rules-section">
+        <div class="rule-row"><div>Placar exato (ex: você 2x1, deu 2x1)</div><div class="rule-pts">10</div></div>
+        <div class="rule-row"><div>Acertou quem ganhou + diferença de gols</div><div class="rule-pts">7</div></div>
+        <div class="rule-row"><div>Acertou só quem ganhou (ou empate)</div><div class="rule-pts">5</div></div>
+        <div class="rule-row"><div>Cada time que você previu que ia se classificar</div><div class="rule-pts">2</div></div>
+      </div>
+
+      <div class="phase-header">🏟 JOGOS DO MATA-MATA</div>
+      <div class="rules-section">
+        <div class="rule-row"><div>Placar exato no tempo normal</div><div class="rule-pts">10</div></div>
+        <div class="rule-row"><div>Acertou vencedor + diferença de gols</div><div class="rule-pts">7</div></div>
+        <div class="rule-row"><div>Acertou quem passou de fase (separado)</div><div class="rule-pts">5</div></div>
+      </div>
+
+      <div class="phase-header">🎁 BÔNUS POR PALPITE ORIGINAL</div>
+      <div class="rules-section">
+        <div style="padding:12px 0 6px;font-size:12px;color:var(--ink-dim);line-height:1.5;border-bottom:1px solid var(--border);">
+          Pontos extras se você acertou o confronto desde o início (antes da Copa começar). Vale mais quanto mais avançada for a fase:
+        </div>
+        <div class="rule-row"><div>Confronto da 1ª fase do mata-mata acertado</div><div class="rule-pts">+3</div></div>
+        <div class="rule-row"><div>Confronto de oitavas acertado</div><div class="rule-pts">+5</div></div>
+        <div class="rule-row"><div>Confronto de quartas acertado</div><div class="rule-pts">+10</div></div>
+        <div class="rule-row"><div>Confronto de semifinal acertado</div><div class="rule-pts">+15</div></div>
+        <div class="rule-row"><div>Os 2 finalistas acertados</div><div class="rule-pts">+25</div></div>
+      </div>
+
+      <div class="phase-header">🏆 PALPITE ESPECIAL</div>
+      <div class="rules-section">
+        <div style="padding:12px 0 6px;font-size:12px;color:var(--ink-dim);line-height:1.5;border-bottom:1px solid var(--border);">
+          Único palpite extra. Trava quando o 1º jogo da Copa começa e só é resolvido no fim do torneio.
+          <br><br>
+          <em>Obs: campeão e vice são pontuados automaticamente pelos acertos no bracket do mata-mata, então não precisam de palpite separado.</em>
+        </div>
+        <div class="rule-row"><div>⚽ Artilheiro do torneio</div><div class="rule-pts">20</div></div>
+      </div>
+
+      <div class="phase-header">⏰ PRAZOS</div>
+      <div class="rules-section" style="padding:14px 18px;font-size:12px;color:var(--ink-dim);line-height:1.8;">
+        • <strong style="color:var(--gold);">Cada palpite de jogo:</strong> trava 10 minutos antes do apito inicial<br>
+        • <strong style="color:var(--gold);">Campeão/Vice/Artilheiro:</strong> trava no 1º jogo da Copa (11/jun)<br>
+        • <strong style="color:var(--gold);">Refazer bracket:</strong> ~24h entre o fim dos grupos e o início do mata-mata<br>
+        • <strong style="color:var(--gold);">Empate na classificação final:</strong> ganha quem tem mais placares exatos
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+// ===========================================================
+// CONFIG — TROCAR A URL ABAIXO PELA URL DA SUA WEB APP
+// ===========================================================
+const API_URL = 'https://script.google.com/macros/s/AKfycbyBQWj9__P-9xUAH19YTjwW5Jv13WZI5CcBJ-5wsv_n6dbHuKaOZXm2ezoDgHNwKyiAGg/exec';
+let state = {
+  user: null,
+  jogos: [],
+  meusPalpites: { grupos: [], bracketF1: [], bracketF2: [], especiais: null },
+  ranking: [],
+  grupos: {},
+  gruposPalpite: {},
+  status: null,
+  bracketDraftF1: null,
+  bracketDraftF2: null
+};
+
+// ===========================================================
+// API HELPER
+// ===========================================================
+/** Esconde o flash de "Carregando..." se o elemento já tem conteúdo renderizado.
+ * Se cache estiver quente, a requisição volta em <50ms e o usuário não vê flash. */
+function showLoadingIfEmpty(el) {
+  // Se a tela já foi renderizada antes (tem conteúdo "real"), mantém na tela
+  // até os novos dados chegarem. Senão, mostra o loading.
+  const temConteudoReal = el.querySelector('.screen-title, .stats-grid, .phase-header');
+  if (!temConteudoReal) {
+    el.innerHTML = '<div class="loading">Carregando…</div>';
+  }
+}
+
+async function api(action, params = {}) {
+  const body = Object.assign({ action }, params);
+  try {
+    const resp = await fetch(API_URL, {
+      method: 'POST',
+      // text/plain evita preflight CORS no Apps Script
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(body)
+    });
+    const json = await resp.json();
+    if (!json.ok) throw new Error(json.error);
+    return json.data;
+  } catch (err) {
+    toast(err.message, true);
+    throw err;
+  }
+}
+
+// ===========================================================
+// CAMADA DE CACHE — reduz drasticamente o tempo de troca de abas
+// ===========================================================
+// TTL = "time to live", em ms. Após esse tempo, o dado é considerado stale.
+const CACHE_TTL = {
+  // Dados que quase nunca mudam — cache longo
+  getJogos: 60_000,            // 1 min (estrutura de jogos)
+  getGrupos: 30_000,           // 30s (composição dos grupos)
+  // Dados do usuário — mudam quando ele salva, mas raramente
+  getMeusPalpites: 30_000,     // 30s
+  getGruposPalpite: 30_000,    // 30s
+  // Dados que podem mudar durante sessão (status, ranking)
+  getStatus: 60_000,           // 1 min
+  getRanking: 30_000,          // 30s
+};
+const cache = new Map();        // chave → { data, ts }
+const inflight = new Map();     // chave → Promise (dedupe de requisições concorrentes)
+
+/** Gera chave única do cache pra (action, params) */
+function cacheKey(action, params) {
+  return action + ':' + JSON.stringify(params || {});
+}
+
+/**
+ * Chama a API com cache + dedupe in-flight.
+ * opts.force=true → bypassa cache
+ * opts.staleOk=true → retorna stale (se existir) sem refetch
+ */
+async function cachedApi(action, params = {}, opts = {}) {
+  const ttl = CACHE_TTL[action];
+  // Sem TTL definido = não cacheia
+  if (!ttl) return api(action, params);
+
+  const key = cacheKey(action, params);
+  const now = Date.now();
+  const entry = cache.get(key);
+
+  // Cache hit válido
+  if (!opts.force && entry && (now - entry.ts) < ttl) {
+    return entry.data;
+  }
+
+  // Stale-OK: retorna o que tem mesmo expirado
+  if (opts.staleOk && entry) {
+    // Dispara refetch em background (sem await) pra atualizar
+    refetchInBackground(action, params, key);
+    return entry.data;
+  }
+
+  // Cache miss ou forçado: faz a chamada (dedupe se já houver in-flight)
+  if (inflight.has(key)) return inflight.get(key);
+
+  const p = api(action, params)
+    .then(data => {
+      cache.set(key, { data, ts: Date.now() });
+      inflight.delete(key);
+      return data;
+    })
+    .catch(err => {
+      inflight.delete(key);
+      throw err;
+    });
+  inflight.set(key, p);
+  return p;
+}
+
+function refetchInBackground(action, params, key) {
+  if (inflight.has(key)) return;
+  const p = api(action, params)
+    .then(data => {
+      cache.set(key, { data, ts: Date.now() });
+      inflight.delete(key);
+    })
+    .catch(() => { inflight.delete(key); });
+  inflight.set(key, p);
+}
+
+/** Invalida entradas de cache (após salvar algo, por exemplo) */
+function invalidateCache(actions) {
+  // actions: array de strings (action names) ou regex de keys
+  for (const key of cache.keys()) {
+    if (actions.some(a => key.startsWith(a + ':'))) {
+      cache.delete(key);
+    }
+  }
+}
+
+/** Pré-busca dados em background pras outras abas ficarem mais rápidas */
+function prefetchAll() {
+  const email = state.user.email;
+  // Roda em paralelo, ignora erros (é só warm-up)
+  cachedApi('getJogos').catch(() => {});
+  cachedApi('getMeusPalpites', { email }).catch(() => {});
+  cachedApi('getStatus').catch(() => {});
+  cachedApi('getRanking').catch(() => {});
+  cachedApi('getGrupos').catch(() => {});
+  cachedApi('getGruposPalpite', { email }).catch(() => {});
+}
+
+function toast(msg, isError = false) {
+  const t = document.createElement('div');
+  t.className = 'toast' + (isError ? ' error' : '');
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
+// ===========================================================
+// LOGIN
+// ===========================================================
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  if (!email) return;
+  document.getElementById('login-btn').disabled = true;
+  document.getElementById('login-error').textContent = '';
+  try {
+    const user = await api('auth', { email });
+    state.user = user;
+    localStorage.setItem('bolao_user', JSON.stringify(user));
+    showApp();
+  } catch (err) {
+    document.getElementById('login-error').textContent = err.message;
+  } finally {
+    document.getElementById('login-btn').disabled = false;
+  }
+}
+
+function doLogout() {
+  localStorage.removeItem('bolao_user');
+  location.reload();
+}
+
+function showApp() {
+  document.getElementById('login').classList.remove('active');
+  document.getElementById('login').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('user-name').textContent = state.user.nome.split(' ')[0];
+  document.getElementById('user-avatar').textContent = state.user.nome[0].toUpperCase();
+  loadDashboard().then(() => {
+    // Após o dashboard carregar, aquece o cache pras outras abas
+    // (em background, sem bloquear nada)
+    prefetchAll();
+  });
+}
+
+// ===========================================================
+// TAB NAV
+// ===========================================================
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const target = btn.dataset.tab;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('main .screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(target).classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Carrega dados sob demanda
+    const loaders = { dashboard: loadDashboard, palpites: loadPalpites, grupos: loadGrupos, bracketF1: loadBracketF1, bracketF2: loadBracketF2, meuspalpites: loadMeusPalpites, especiais: loadEspeciais, ranking: loadRanking };
+    if (loaders[target]) loaders[target]();
+  });
+});
+
+// ===========================================================
+// DASHBOARD
+// ===========================================================
+async function loadDashboard() {
+  const el = document.getElementById('dashboard');
+  showLoadingIfEmpty(el);
+
+  const [jogos, meus, ranking, status] = await Promise.all([
+    cachedApi('getJogos'),
+    cachedApi('getMeusPalpites', { email: state.user.email }),
+    cachedApi('getRanking'),
+    cachedApi('getStatus')
+  ]);
+  state.jogos = jogos;
+  state.meusPalpites = meus;
+  state.ranking = ranking;
+  state.status = status;
+
+  const minhaPos = ranking.findIndex(r => r.Email === state.user.email);
+  const meuRank = ranking[minhaPos] || { 'Pontos Totais': 0, 'Placares Exatos': 0 };
+  const minhaPontuacao = meuRank['Pontos Totais'] || 0;
+  const exatos = meuRank['Placares Exatos'] || 0;
+
+  // Contadores de palpites
+  const totalGruposPalpitados = (meus.grupos || []).length;
+  const totalGruposPossiveis = jogos.filter(j => String(j.fase || '').startsWith('Grupo')).length;
+  const totalF1Palpitados = (meus.bracketF1 || []).length;
+  const totalF2Palpitados = (meus.bracketF2 || []).length;
+
+  // Estado das fases
+  const f1Aberta = !!status.f1Aberta;
+  const f2Aberta = !!status.f2Aberta;
+  const inicioCopa = status.inicioCopa ? new Date(status.inicioCopa) : null;
+
+  // ===== AVISOS CRÍTICOS — só os mais relevantes =====
+  const avisos = [];
+
+  // 1) Palpite Oficial aberto → URGENTE
+  if (f2Aberta && totalF2Palpitados === 0) {
+    avisos.push({
+      tipo: 'urgente',
+      icone: '⚡',
+      titulo: 'PALPITE OFICIAL ABERTO AGORA',
+      texto: 'A fase de grupos terminou! Refaça o bracket com os times reais pra valer a pontuação por placar.',
+      botao: { texto: 'Ir pro Palpite Oficial', tab: 'bracketF2' }
+    });
+  } else if (f2Aberta && totalF2Palpitados > 0 && totalF2Palpitados < 32) {
+    avisos.push({
+      tipo: 'aviso',
+      icone: '⚡',
+      titulo: `Palpite Oficial: ${totalF2Palpitados}/32 confrontos`,
+      texto: 'Você começou mas não terminou. Pode editar várias vezes durante a janela.',
+      botao: { texto: 'Continuar', tab: 'bracketF2' }
+    });
+  }
+
+  // 2) Palpite Antecipado aberto, incompleto
+  if (f1Aberta && totalF1Palpitados < 32) {
+    const diasParaCopa = inicioCopa ? Math.ceil((inicioCopa - new Date()) / 86400000) : null;
+    avisos.push({
+      tipo: totalF1Palpitados === 0 ? 'urgente' : 'aviso',
+      icone: '🔮',
+      titulo: totalF1Palpitados === 0
+        ? 'VOCÊ AINDA NÃO FEZ O PALPITE ANTECIPADO'
+        : `Palpite Antecipado: ${totalF1Palpitados}/32 confrontos`,
+      texto: diasParaCopa != null && diasParaCopa > 0
+        ? `Faltam ${diasParaCopa} dia${diasParaCopa > 1 ? 's' : ''} pra Copa começar. Não perca o BÔNUS por confronto acertado (até +25 pts na Final).`
+        : 'A Copa começa em breve. Não perca o BÔNUS por confronto acertado (até +25 pts na Final).',
+      botao: { texto: 'Fazer agora', tab: 'bracketF1' }
+    });
+  }
+
+  // 3) Grupos incompletos
+  if (f1Aberta && totalGruposPalpitados < totalGruposPossiveis) {
+    avisos.push({
+      tipo: 'info',
+      icone: '⚽',
+      titulo: `Fase de Grupos: ${totalGruposPalpitados}/${totalGruposPossiveis} jogos`,
+      texto: 'Palpite todos os jogos pra maximizar sua pontuação (placar exato vale 10 pts).',
+      botao: { texto: 'Ir pros palpites', tab: 'palpites' }
+    });
+  }
+
+  // 4) Artilheiro não palpitado (especiais ainda abertos)
+  const artilheiroPalpitado = meus.especiais && meus.especiais['Artilheiro'];
+  if (status.especiaisAbertos && !artilheiroPalpitado) {
+    const diasParaCopa = inicioCopa ? Math.ceil((inicioCopa - new Date()) / 86400000) : null;
+    avisos.push({
+      tipo: diasParaCopa != null && diasParaCopa <= 3 ? 'urgente' : 'info',
+      icone: '⚽',
+      titulo: 'Você não palpitou o artilheiro',
+      texto: diasParaCopa != null && diasParaCopa > 0
+        ? `Faltam ${diasParaCopa} dia${diasParaCopa > 1 ? 's' : ''} pra travar (11/jun). Acertar vale 20 pts.`
+        : 'Trava no 1º jogo da Copa. Acertar vale 20 pts.',
+      botao: { texto: 'Palpitar agora', tab: 'especiais' }
+    });
+  }
+
+  // ===== JOGOS DE HOJE =====
+  const hojeStr = new Date().toLocaleDateString('pt-BR');
+  const jogosHoje = jogos
+    .filter(j => j.dataHora && new Date(j.dataHora).toLocaleDateString('pt-BR') === hojeStr)
+    .sort((a, b) => new Date(a.dataHora) - new Date(b.dataHora));
+
+  // ===== PRÓXIMOS JOGOS (3, excluindo os de hoje) =====
+  const agora = new Date();
+  const proximos = jogos
+    .filter(j => j.dataHora && new Date(j.dataHora) > agora &&
+                 new Date(j.dataHora).toLocaleDateString('pt-BR') !== hojeStr)
+    .sort((a, b) => new Date(a.dataHora) - new Date(b.dataHora))
+    .slice(0, 3);
+
+  // ===== ÚLTIMOS RESULTADOS =====
+  const ultimos = jogos
+    .filter(j => j.status === 'ENCERRADO')
+    .sort((a, b) => new Date(b.dataHora) - new Date(a.dataHora))
+    .slice(0, 3);
+
+  // ===== TOP 3 DO RANKING =====
+  const top3 = ranking.slice(0, 3);
+
+  el.innerHTML = `
+    <h1 class="screen-title">OLÁ, <span class="accent">${state.user.nome.split(' ')[0].toUpperCase()}</span></h1>
+    <div class="screen-sub">SEU RESUMO · ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</div>
+
+    <!-- Stats principais -->
+    <div class="stats-grid">
+      <div class="stat-card featured">
+        <div class="stat-label">SUA PONTUAÇÃO</div>
+        <div class="stat-value huge">${minhaPontuacao}</div>
+        <div class="stat-meta">#${minhaPos + 1} de ${ranking.length} participantes</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Placares Exatos</div>
+        <div class="stat-value">${exatos}</div>
+        <div class="stat-meta">10 pts cada</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Bônus Antecipado</div>
+        <div class="stat-value">${meuRank['Bônus F1'] || 0}</div>
+        <div class="stat-meta">confrontos acertados</div>
+      </div>
+    </div>
+
+    <!-- AVISOS -->
+    ${avisos.length > 0 ? `
+      <div class="dashboard-avisos">
+        ${avisos.map(a => `
+          <div class="aviso-card ${a.tipo}">
+            <div class="aviso-icone">${a.icone}</div>
+            <div class="aviso-corpo">
+              <div class="aviso-titulo">${a.titulo}</div>
+              <div class="aviso-texto">${a.texto}</div>
+            </div>
+            ${a.botao ? `<button class="aviso-botao" onclick="document.querySelector('[data-tab=&quot;${a.botao.tab}&quot;]').click()">${a.botao.texto} →</button>` : ''}
+          </div>
+        `).join('')}
+      </div>
+    ` : ''}
+
+    <!-- JOGOS DE HOJE -->
+    ${jogosHoje.length > 0 ? `
+      <div class="phase-header">📅 JOGOS DE HOJE<span class="meta">${jogosHoje.length} JOGO${jogosHoje.length > 1 ? 'S' : ''}</span></div>
+      ${jogosHoje.map(j => renderMatchCard(j, true)).join('')}
+    ` : ''}
+
+    <!-- PRÓXIMOS JOGOS -->
+    ${proximos.length > 0 ? `
+      <div class="phase-header">⏭ PRÓXIMOS JOGOS<span class="meta">${proximos.length}</span></div>
+      ${proximos.map(j => renderMatchCard(j, true)).join('')}
+    ` : ''}
+
+    <!-- ÚLTIMOS RESULTADOS -->
+    ${ultimos.length > 0 ? `
+      <div class="phase-header">📊 ÚLTIMOS RESULTADOS<span class="meta">${ultimos.length}</span></div>
+      ${ultimos.map(j => renderMatchCard(j, true)).join('')}
+    ` : ''}
+
+    <!-- RANKING RÁPIDO -->
+    ${top3.length > 0 ? `
+      <div class="phase-header">🏆 TOP DO RANKING<span class="meta">VEJA TODOS NA ABA RANKING</span></div>
+      <div class="dashboard-ranking-mini">
+        ${top3.map((r, i) => {
+          const isMe = r.Email === state.user.email;
+          return `
+            <div class="ranking-mini-row ${isMe ? 'me' : ''}">
+              <div class="ranking-mini-pos pos-${i + 1}">${i + 1}º</div>
+              <div class="ranking-mini-nome">${r.Nome || r.Email.split('@')[0]}${isMe ? ' (você)' : ''}</div>
+              <div class="ranking-mini-pts">${r['Pontos Totais'] || 0} pts</div>
+            </div>
+          `;
+        }).join('')}
+        ${minhaPos >= 3 ? `
+          <div class="ranking-mini-row me ranking-mini-row-divisor">
+            <div class="ranking-mini-pos">${minhaPos + 1}º</div>
+            <div class="ranking-mini-nome">você</div>
+            <div class="ranking-mini-pts">${minhaPontuacao} pts</div>
+          </div>
+        ` : ''}
+      </div>
+    ` : ''}
+
+    ${jogosHoje.length === 0 && proximos.length === 0 && ultimos.length === 0 && avisos.length === 0
+      ? '<div class="empty">Nenhuma atividade ainda. A Copa começa em 11/jun!</div>'
+      : ''}
+  `;
+}
+
+function formatTimeUntil(dataHora) {
+  const dt = new Date(dataHora);
+  const diffMin = Math.round((dt - new Date()) / 60000);
+  if (diffMin < 60) return `EM ${diffMin}MIN`;
+  const dias = Math.floor(diffMin / 1440);
+  if (dias >= 1) return `EM ${dias} DIA${dias > 1 ? 'S' : ''}`;
+  const hh = Math.floor(diffMin / 60);
+  const mm = diffMin % 60;
+  return `EM ${hh}H ${mm}MIN`;
+}
+
+// ===========================================================
+// PALPITES (jogos abertos)
+// ===========================================================
+async function loadPalpites() {
+  const el = document.getElementById('palpites');
+  el.innerHTML = '<div class="loading">Carregando jogos…</div>';
+
+  if (!state.jogos.length) state.jogos = await cachedApi('getJogos');
+  if (!state.meusPalpites.grupos.length) state.meusPalpites = await cachedApi('getMeusPalpites', { email: state.user.email });
+
+  const agora = new Date();
+  // Jogos com data definida e que ainda não começaram (ou estão ao vivo/encerrados)
+  const abertos = state.jogos.filter(j => j.dataHora);
+  // Agrupa por dia
+  const porDia = {};
+  abertos.forEach(j => {
+    const d = new Date(j.dataHora).toLocaleDateString('pt-BR');
+    if (!porDia[d]) porDia[d] = [];
+    porDia[d].push(j);
+  });
+  const dias = Object.keys(porDia).sort((a, b) => {
+    return new Date(porDia[a][0].dataHora) - new Date(porDia[b][0].dataHora);
+  });
+
+  el.innerHTML = `
+    <h1 class="screen-title">PALPITES FASE DE GRUPOS</h1>
+    <div class="screen-sub">72 JOGOS · PALPITE OS PLACARES</div>
+    ${dias.length === 0 ? '<div class="empty">Nenhum jogo agendado ainda.</div>' :
+      dias.map(d => `
+        <div class="phase-header">${d}<span class="meta">${porDia[d].length} JOGO(S)</span></div>
+        ${porDia[d].map(j => renderMatchCard(j, false)).join('')}
+      `).join('')
+    }
+    <button class="save-fab" onclick="salvarPalpites()">Salvar palpites ✓</button>
+  `;
+}
+
+function renderMatchCard(j, readOnly) {
+  const palpite = state.meusPalpites.grupos.find(p => p['Jogo ID'] === j.id);
+  const palpA = palpite ? palpite['Palpite A'] : '';
+  const palpB = palpite ? palpite['Palpite B'] : '';
+  const isLive = j.status === 'AO VIVO';
+  const isDone = j.status === 'ENCERRADO';
+  const lock = readOnly || isDone || isLive;
+  const dt = j.dataHora ? new Date(j.dataHora) : null;
+
+  let resultLine = '';
+  if (isDone && palpite) {
+    const pts = ptsParaPalpite(j, palpA, palpB);
+    resultLine = `<div class="result-line">PALPITE: ${palpA}×${palpB} · RESULTADO: ${j.golsA}×${j.golsB} · <span class="pts${pts === 10 ? ' exact' : ''}">+${pts} PTS</span></div>`;
+  }
+
+  return `
+    <div class="match-card ${lock ? 'locked' : ''} ${isLive ? 'live-card' : ''}">
+      <div class="match-meta">
+        <span>${dt ? dt.toLocaleString('pt-BR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'A definir'} · ${j.fase}</span>
+        <span>${isLive ? '<span class="live-now">● AO VIVO</span>' : isDone ? '🔒 ENCERRADO' : '🔓 ABERTO'}</span>
+      </div>
+      <div class="match-row">
+        <div class="team-side">
+          ${flagFor(j.timeA)}
+          <span class="team-label-sm">${nomeFor(j.timeA)}</span>
+        </div>
+        <div class="score-block">
+          <input class="score-input" type="number" min="0" max="9"
+                 data-jogo="${j.id}" data-lado="A"
+                 value="${isDone ? j.golsA : palpA}" ${lock ? 'disabled' : ''}>
+          <span class="score-x">×</span>
+          <input class="score-input" type="number" min="0" max="9"
+                 data-jogo="${j.id}" data-lado="B"
+                 value="${isDone ? j.golsB : palpB}" ${lock ? 'disabled' : ''}>
+        </div>
+        <div class="team-side right">
+          <span class="team-label-sm">${nomeFor(j.timeB)}</span>
+          ${flagFor(j.timeB)}
+        </div>
+      </div>
+      ${resultLine}
+    </div>
+  `;
+}
+
+async function salvarPalpites() {
+  const inputs = document.querySelectorAll('#palpites .score-input:not([disabled])');
+  const porJogo = {};
+  inputs.forEach(inp => {
+    const id = inp.dataset.jogo;
+    const lado = inp.dataset.lado;
+    if (!porJogo[id]) porJogo[id] = {};
+    porJogo[id][lado] = inp.value;
+  });
+
+  // Monta array só com palpites completos (A e B preenchidos)
+  const palpites = [];
+  for (const [jogoId, p] of Object.entries(porJogo)) {
+    if (p.A !== '' && p.B !== '' && p.A != null && p.B != null) {
+      palpites.push({ jogoId, palpiteA: p.A, palpiteB: p.B });
+    }
+  }
+
+  if (palpites.length === 0) {
+    toast('Preencha pelo menos um palpite', true);
+    return;
+  }
+
+  const fab = document.querySelector('.save-fab');
+  fab.disabled = true;
+  fab.textContent = `Salvando ${palpites.length} palpites...`;
+
+  try {
+    // 1 ÚNICA chamada API em vez de N
+    const result = await api('salvarPalpitesBatch', {
+      email: state.user.email,
+      palpites: palpites
+    });
+    toast(`${result.saved} palpite(s) salvos`);
+    // Invalida e força refetch
+    invalidateCache(['getMeusPalpites', 'getGruposPalpite', 'getRanking']);
+    state.meusPalpites = await cachedApi('getMeusPalpites', { email: state.user.email }, { force: true });
+  } catch (err) {
+    // toast já mostrado pelo api()
+  } finally {
+    fab.disabled = false;
+    fab.textContent = 'Salvar palpites ✓';
+  }
+}
+
+// ===========================================================
+// GRUPOS
+// ===========================================================
+async function loadGrupos() {
+  const el = document.getElementById('grupos');
+  showLoadingIfEmpty(el);
+
+  const [grupos, gruposPalpite, jogos] = await Promise.all([
+    cachedApi('getGrupos'),
+    cachedApi('getGruposPalpite', { email: state.user.email }),
+    state.jogos.length ? Promise.resolve(state.jogos) : cachedApi('getJogos')
+  ]);
+  state.grupos = grupos;
+  state.gruposPalpite = gruposPalpite;
+  state.jogos = jogos;
+
+  const letras = Object.keys(grupos).sort();
+
+  // Jogos AO VIVO ou encerrados nas últimas 24h
+  const agora = new Date();
+  const aoVivo = jogos.filter(j => j.status === 'AO VIVO');
+  const recentes = jogos
+    .filter(j => j.status === 'ENCERRADO' && j.dataHora &&
+                 (agora - new Date(j.dataHora)) < 24 * 60 * 60 * 1000)
+    .sort((a, b) => new Date(b.dataHora) - new Date(a.dataHora))
+    .slice(0, 3);
+
+  el.innerHTML = `
+    <h1 class="screen-title">CLASSIFICAÇÃO</h1>
+    <div class="screen-sub">REAL × SEU PALPITE · LADO A LADO</div>
+
+    ${aoVivo.length > 0 ? `
+      <div class="phase-header">AGORA<span class="meta">${aoVivo.length} JOGO(S) AO VIVO</span></div>
+      ${aoVivo.map(j => renderMatchCard(j, true)).join('')}
+    ` : ''}
+
+    ${recentes.length > 0 && aoVivo.length === 0 ? `
+      <div class="phase-header">ÚLTIMAS 24H<span class="meta">${recentes.length} JOGO(S)</span></div>
+      ${recentes.map(j => renderMatchCard(j, true)).join('')}
+    ` : ''}
+
+    <div style="font-size:11px;color:var(--ink-dim);margin:12px 0;font-family:'JetBrains Mono',monospace;letter-spacing:0.5px;">
+      <span style="color:var(--green)">●</span> classifica direto · <span style="color:var(--gold)">●</span> possível 3º melhor · <span style="color:var(--ink-dim)">●</span> eliminado
+    </div>
+
+    ${letras.map(g => renderGrupoComparado(g, grupos[g], gruposPalpite[g] || [])).join('')}
+  `;
+}
+
+/** Renderiza um grupo COM 2 colunas lado a lado: real | palpite */
+function renderGrupoComparado(letra, timesReais, timesPalpite) {
+  const temPalpite = timesPalpite && timesPalpite.length > 0 && timesPalpite.some(t => t.j > 0);
+  return `
+    <div class="group-compare">
+      <div class="group-compare-title">GRUPO ${letra}</div>
+      <div class="group-compare-grid">
+        <div class="group-compare-col">
+          <div class="group-compare-sublabel real">AO VIVO</div>
+          ${renderGrupoTabela(timesReais)}
+        </div>
+        <div class="group-compare-col">
+          <div class="group-compare-sublabel palpite">SEU PALPITE</div>
+          ${temPalpite ? renderGrupoTabela(timesPalpite) : '<div class="group-compare-empty">Sem palpites para este grupo</div>'}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/** Renderiza apenas o conteúdo da tabela de classificação (sem card wrapper) */
+function renderGrupoTabela(times) {
+  return `
+    <table class="standings">
+      <thead><tr>
+        <th>Time</th><th class="num">J</th><th class="num">V</th><th class="num">E</th>
+        <th class="num">D</th><th class="num">SG</th><th class="num">PTS</th>
+      </tr></thead>
+      <tbody>
+        ${(times || []).map((t, i) => `
+          <tr>
+            <td><div class="team-cell">
+              <span class="pos-badge ${posBadgeClass(i)}">${i + 1}</span>
+              <span style="display:inline-flex;align-items:center;gap:6px">${flagFor(t.codigo)} ${t.nome}</span>
+            </div></td>
+            <td class="num">${t.j}</td><td class="num">${t.v}</td><td class="num">${t.e}</td>
+            <td class="num">${t.d}</td><td class="num">${t.sg > 0 ? '+' : ''}${t.sg}</td>
+            <td class="num pts-cell">${t.pts}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+/** Versão antiga preservada por compatibilidade caso seja chamada de outro lugar */
+function renderGrupo(letra, times, isPalpite) {
+  const temDados = times && times.length > 0 && times.some(t => t.j > 0);
+  return `
+    <div class="group-card">
+      <div class="group-title">
+        GRUPO ${letra}
+        ${isPalpite ? '<span style="font-size:10px;color:var(--gold);font-family:\'JetBrains Mono\',monospace;letter-spacing:0.5px;">SEU PALPITE</span>' : ''}
+      </div>
+      ${renderGrupoTabela(times)}
+      ${isPalpite && !temDados ? '<div style="padding:12px 14px;color:var(--ink-dim);font-size:11px;text-align:center;font-style:italic;">Você ainda não palpitou jogos deste grupo</div>' : ''}
+    </div>
+  `;
+}
+
+function posBadgeClass(i) {
+  if (i === 0) return 'q1';
+  if (i === 1) return 'q2';
+  if (i === 2) return 'q3';
+  return 'out';
+}
+
+// ===========================================================
+// MATA-MATA — duas abas separadas
+//   F1 = palpite no escuro (antes da Copa). Vale o bônus de confronto.
+//   F2 = bracket real (após fim dos grupos). Vale a pontuação por placar.
+// ===========================================================
+
+/** Resolve placeholders (1A, 2B, 3-ABCDF, V73, P101) usando uma fonte de grupos
+ * (real ou pelo palpite) + os palpites de bracket já salvos / em draft. */
+function makeResolverPlaceholder(fonteGrupos, palpitesBracket, draft, exigirJogados) {
+  // Pré-calcula a alocação dos melhores 3ºs (consistente, sem duplicação entre slots)
+  const cacheTerceiros = calcularMelhoresTerceiros(fonteGrupos);
+
+  return function resolve(codigo) {
+    if (!codigo) return null;
+    if (NOMES[codigo]) return codigo;  // já é time real
+
+    // 1A, 2A — posição no grupo
+    const mPos = String(codigo).match(/^([12])([A-L])$/);
+    if (mPos) {
+      const [, pos, letra] = mPos;
+      const grupo = (fonteGrupos || {})[letra] || [];
+      const time = grupo[Number(pos) - 1];
+      if (!time) return null;
+      if (exigirJogados && !time.j) return null;  // em F1: só usa se palpitou jogos do grupo
+      return time.codigo;
+    }
+
+    // 3-XXXX — usa alocação pré-calculada (cada time só aparece em 1 slot)
+    const m3 = String(codigo).match(/^3-[A-L]+$/);
+    if (m3) {
+      return cacheTerceiros[codigo] || null;
+    }
+
+    // V73, P101 — vencedor/perdedor de partida do bracket
+    const mVP = String(codigo).match(/^([VP])(\d+)$/);
+    if (mVP) {
+      const [, tipo, num] = mVP;
+
+      // Draft em memória (mudanças não salvas) tem prioridade
+      const d = draft && draft[num];
+      if (d && d.vencedor) {
+        if (tipo === 'V') return d.vencedor;
+        return d.vencedor === d.timeA ? d.timeB : d.timeA;
+      }
+
+      // Senão, palpite salvo no backend
+      const p = palpitesBracket && palpitesBracket[num];
+      if (!p || !p['Vencedor previsto']) return null;
+      const vencedor = p['Vencedor previsto'];
+      if (tipo === 'V') return vencedor;
+      const ta = p['Time A previsto'];
+      const tb = p['Time B previsto'];
+      return vencedor === ta ? tb : ta;
+    }
+
+    return null;
+  };
+}
+
+/** Anexa timeAEfetivo/timeBEfetivo ao jogo usando o resolver fornecido */
+function enriqueceJogosBracket(jogos, resolver) {
+  return jogos.map(j => ({
+    ...j,
+    timeAEfetivo: resolver(j.timeA) || j.timeA,
+    timeBEfetivo: resolver(j.timeB) || j.timeB,
+    timeAOriginal: j.timeA,
+    timeBOriginal: j.timeB
+  }));
+}
+
+// ===========================================================
+// MATA-MATA F1 — palpite no escuro (antes da Copa)
+// ===========================================================
+async function loadBracketF1() {
+  const el = document.getElementById('bracketF1');
+  showLoadingIfEmpty(el);
+
+  const [jogos, meus, status, gruposPalpite] = await Promise.all([
+    state.jogos.length ? Promise.resolve(state.jogos) : cachedApi('getJogos'),
+    cachedApi('getMeusPalpites', { email: state.user.email }),
+    state.status ? Promise.resolve(state.status) : cachedApi('getStatus'),
+    cachedApi('getGruposPalpite', { email: state.user.email })
+  ]);
+  state.jogos = jogos;
+  state.meusPalpites = meus;
+  state.status = status;
+  state.gruposPalpite = gruposPalpite;
+  state._cacheTerceirosF1 = null;  // força recálculo dos melhores 3ºs com palpites atualizados
+
+  // F1 está aberta enquanto a Copa não começou
+  const editavel = !!status.f1Aberta;
+
+  // Indexa palpites F1
+  const palpitesF1 = {};
+  (meus.bracketF1 || []).forEach(p => { palpitesF1[String(p['Jogo ID'])] = p; });
+
+  // F1 resolve placeholders usando palpites de GRUPOS do próprio usuário (porque a Copa não começou)
+  // V/P: usa palpites F1 + draft (se editável)
+  const draft = editavel ? state.bracketDraftF1 : null;
+  const resolver = makeResolverPlaceholder(gruposPalpite, palpitesF1, draft, true);
+
+  // Separa jogos por fase
+  const r32 = enriqueceJogosBracket(jogos.filter(j => j.fase === 'Round of 32').sort((a, b) => Number(a.id) - Number(b.id)), resolver);
+  const r16 = enriqueceJogosBracket(jogos.filter(j => j.fase === 'Oitavas').sort((a, b) => Number(a.id) - Number(b.id)), resolver);
+  const qf = enriqueceJogosBracket(jogos.filter(j => j.fase === 'Quartas').sort((a, b) => Number(a.id) - Number(b.id)), resolver);
+  const sf = enriqueceJogosBracket(jogos.filter(j => j.fase === 'Semifinal').sort((a, b) => Number(a.id) - Number(b.id)), resolver);
+  const fi = enriqueceJogosBracket(jogos.filter(j => j.fase === 'Final'), resolver);
+  const d3 = enriqueceJogosBracket(jogos.filter(j => j.fase === 'Disputa 3º'), resolver);
+
+  const totalPalpitesGrupos = (meus.grupos || []).length;
+  const totalF1 = Object.keys(palpitesF1).length;
+
+  // Banner + explicação por estado
+  let banner, explicacao;
+  if (editavel) {
+    banner = `
+      <div class="bracket-status open f1">
+        <div style="font-size:13px;font-weight:700;">🔓 PALPITE ANTECIPADO ABERTO — palpite antes da Copa começar</div>
+        <div style="font-size:11px;margin-top:4px;color:var(--ink-dim);font-family:'JetBrains Mono',monospace;letter-spacing:0.3px;">
+          ${totalF1}/32 confrontos palpitados · trava em 11/jun
+        </div>
+      </div>
+    `;
+    explicacao = `
+      <div class="bracket-legend">
+        <div style="font-weight:700;margin-bottom:6px;">Como funciona o Palpite Antecipado</div>
+        <div>1. Você palpita TODO o caminho até a Final, sem saber ainda quem vai classificar.</div>
+        <div>2. Os 16 confrontos do Round of 32 são <strong>pré-preenchidos pelos seus palpites de grupos</strong>: o app calcula quem você acha que vai ser 1º, 2º e 3º.</div>
+        <div>3. Em cada jogo, clica no time que você acha que vai avançar.</div>
+        <div>4. Conforme você marca vencedores, os times vão se propagando pras fases seguintes automaticamente.</div>
+        <hr style="border:none;border-top:1px solid var(--border);margin:10px 0;">
+        <div style="font-weight:700;margin-bottom:6px;">O que vale o Palpite Antecipado?</div>
+        <div>• <strong>BÔNUS de confronto:</strong> R32 +3 / Oitavas +5 / Quartas +10 / Semi +15 / Final +25 pts</div>
+        <div>• Aqui você NÃO palpita placares — a pontuação por placar vem do Palpite Oficial (que você fará após os grupos).</div>
+        <div style="margin-top:8px;font-size:11px;color:var(--ink-dim);">⏰ Após 11/jun, o Palpite Antecipado trava. Quando os grupos terminarem (~27/jun), abre o Palpite Oficial (aba ao lado) pra você refazer com os times reais e palpitar os placares.</div>
+      </div>
+    `;
+  } else {
+    // Travada: read-only com indicação de acertos
+    banner = `
+      <div class="bracket-status closed">
+        <div style="font-size:13px;font-weight:700;">🔒 PALPITE ANTECIPADO TRAVADO</div>
+        <div style="font-size:11px;margin-top:4px;color:var(--ink-dim);font-family:'JetBrains Mono',monospace;letter-spacing:0.3px;">
+          ${totalF1}/32 confrontos palpitados · acompanhe abaixo o que você acertou conforme os jogos vão acontecendo
+        </div>
+      </div>
+    `;
+    explicacao = `
+      <div class="bracket-legend">
+        <div>📋 Seu Palpite Antecipado está travado. Os confrontos que você ACERTOU desde antes da Copa vão render <strong>bônus extras</strong> conforme os jogos acontecem (R32 +3 / Oitavas +5 / Quartas +10 / Semi +15 / Final +25).</div>
+        <div style="margin-top:6px;color:var(--ink-dim);font-size:11px;">Pra refazer o bracket com os times reais, vá na aba <strong>Palpite Oficial</strong>.</div>
+      </div>
+    `;
+  }
+
+  const avisoGrupos = editavel && totalPalpitesGrupos < 72
+    ? `<div style="margin-top:8px;padding:8px 10px;background:rgba(255,199,44,0.08);border-left:3px solid var(--gold);color:var(--gold);font-size:11px;">⚠️ Você palpitou apenas ${totalPalpitesGrupos}/72 jogos da fase de grupos. Vá na aba <strong>Jogos</strong> e complete pra ver o bracket totalmente preenchido.</div>`
+    : '';
+
+  el.innerHTML = `
+    <h1 class="screen-title">PALPITE ANTECIPADO</h1>
+    <div class="screen-sub">MATA-MATA NO ESCURO · VALE O BÔNUS DE CONFRONTO</div>
+
+    ${banner}
+    ${explicacao}
+    ${avisoGrupos}
+
+    ${renderBracketSecaoF1('ROUND OF 32', '16 JOGOS · BÔNUS +3 PTS', r32, palpitesF1, !editavel)}
+    ${renderBracketSecaoF1('OITAVAS DE FINAL', '8 JOGOS · BÔNUS +5 PTS', r16, palpitesF1, !editavel)}
+    ${renderBracketSecaoF1('QUARTAS DE FINAL', '4 JOGOS · BÔNUS +10 PTS', qf, palpitesF1, !editavel)}
+    ${renderBracketSecaoF1('SEMIFINAIS', '2 JOGOS · BÔNUS +15 PTS', sf, palpitesF1, !editavel)}
+    ${renderBracketSecaoF1('DISPUTA 3º LUGAR', '1 JOGO', d3, palpitesF1, !editavel)}
+    ${renderBracketSecaoF1('FINAL', '1 JOGO · BÔNUS +25 PTS', fi, palpitesF1, !editavel)}
+
+    ${editavel ? `<button class="save-fab" onclick="salvarBracketF1()">Salvar Palpite Antecipado ✓</button>` : ''}
+  `;
+}
+
+function renderBracketSecaoF1(titulo, meta, jogosDaFase, palpitesF1, locked) {
+  return `
+    <div class="phase-header">${titulo}<span class="meta">${meta}</span></div>
+    <div class="bracket-grid">
+      ${jogosDaFase.map(j => renderBracketMatchF1(j, palpitesF1, locked)).join('')}
+    </div>
+  `;
+}
+
+/** Renderiza um card do bracket F1 (com indicador de acerto se já travou) */
+function renderBracketMatchF1(j, palpitesF1, locked) {
+  const palpite = palpitesF1[String(j.id)];
+  let vencedorPrevisto = palpite ? palpite['Vencedor previsto'] : null;
+
+  // Draft em memória (se aberto)
+  const draft = state.bracketDraftF1 && state.bracketDraftF1[String(j.id)];
+  if (draft && !locked) {
+    vencedorPrevisto = draft.vencedor;
+  }
+
+  const codA = j.timeAEfetivo || j.timeA;
+  const codB = j.timeBEfetivo || j.timeB;
+  const phA = isPlaceholder(codA);
+  const phB = isPlaceholder(codB);
+
+  const aSelected = vencedorPrevisto && (vencedorPrevisto === codA || vencedorPrevisto === j.timeAOriginal);
+  const bSelected = vencedorPrevisto && (vencedorPrevisto === codB || vencedorPrevisto === j.timeBOriginal);
+
+  // Se o jogo já terminou: verifica se acertou o confronto
+  let statusBadge = '';
+  if (j.status === 'ENCERRADO' && palpite) {
+    const timesReais = [j.timeA, j.timeB].sort();
+    const timesPrev = [palpite['Time A previsto'], palpite['Time B previsto']].sort();
+    const acertouConfronto = timesReais[0] === timesPrev[0] && timesReais[1] === timesPrev[1];
+
+    if (acertouConfronto) {
+      const bonus = { 'Round of 32': '+3', 'Oitavas': '+5', 'Quartas': '+10', 'Semifinal': '+15', 'Final': '+25' }[j.fase] || '';
+      statusBadge = `<span class="bracket-bonus-badge acertou">✓ confronto ${bonus} pts</span>`;
+    } else {
+      statusBadge = `<span class="bracket-bonus-badge errou">✗ confronto errado</span>`;
+    }
+  }
+
+  const labelA = phA ? nomeFor(codA) : `${nomeFor(codA)}${codA !== j.timeAOriginal ? ' <span class="resolved-mark" title="resolvido pelos seus palpites de grupos">▸</span>' : ''}`;
+  const labelB = phB ? nomeFor(codB) : `${nomeFor(codB)}${codB !== j.timeBOriginal ? ' <span class="resolved-mark" title="resolvido pelos seus palpites de grupos">▸</span>' : ''}`;
+
+  return `
+    <div class="bracket-match" data-jogo-id="${j.id}"
+         data-time-a="${codA}" data-time-b="${codB}"
+         data-time-a-original="${j.timeAOriginal || j.timeA}"
+         data-time-b-original="${j.timeBOriginal || j.timeB}"
+         data-mode="F1">
+      <div class="bracket-meta">JOGO ${j.id} ${statusBadge}</div>
+      <div class="bracket-row f1-row">
+        <button class="bracket-team ${aSelected ? 'winner' : ''} ${phA ? 'placeholder' : ''}"
+                onclick="toggleBracketWinnerF1(${j.id}, 'A')"
+                ${locked || phA ? 'disabled' : ''}>
+          ${flagFor(codA)}
+          <span class="bracket-team-name">${labelA}</span>
+        </button>
+      </div>
+      <div class="bracket-row f1-row">
+        <button class="bracket-team ${bSelected ? 'winner' : ''} ${phB ? 'placeholder' : ''}"
+                onclick="toggleBracketWinnerF1(${j.id}, 'B')"
+                ${locked || phB ? 'disabled' : ''}>
+          ${flagFor(codB)}
+          <span class="bracket-team-name">${labelB}</span>
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function toggleBracketWinnerF1(jogoId, lado) {
+  const card = document.querySelector(`.bracket-match[data-jogo-id="${jogoId}"][data-mode="F1"]`);
+  if (!card) return;
+  const buttons = card.querySelectorAll('.bracket-team');
+  const idx = lado === 'A' ? 0 : 1;
+
+  // Toggle visual no card clicado
+  if (buttons[idx].classList.contains('winner')) {
+    buttons[idx].classList.remove('winner');
+  } else {
+    buttons[0].classList.remove('winner');
+    buttons[1].classList.remove('winner');
+    buttons[idx].classList.add('winner');
+  }
+
+  // Atualiza só o draft em memória (sem recarregar)
+  atualizarDraftF1(String(jogoId));
+
+  // Propaga pros cards downstream que dependiam deste jogo
+  propagarParaDownstreamF1(String(jogoId));
+}
+
+/** Atualiza o draft de um jogo específico a partir do estado visual do card */
+function atualizarDraftF1(jogoId) {
+  if (!state.bracketDraftF1) state.bracketDraftF1 = {};
+  const card = document.querySelector(`.bracket-match[data-jogo-id="${jogoId}"][data-mode="F1"]`);
+  if (!card) return;
+  const buttons = card.querySelectorAll('.bracket-team');
+  const aWinner = buttons[0].classList.contains('winner');
+  const bWinner = buttons[1].classList.contains('winner');
+  const timeA = card.dataset.timeA;
+  const timeB = card.dataset.timeB;
+  state.bracketDraftF1[jogoId] = {
+    timeA, timeB,
+    vencedor: aWinner ? timeA : (bWinner ? timeB : null)
+  };
+}
+
+/**
+ * Quando o usuário marca vencedor do jogo X, busca jogos que tinham V{X} ou P{X}
+ * como placeholder original e atualiza visualmente APENAS esses cards.
+ * Recursivo: se o card downstream também tinha vencedor marcado, propaga adiante.
+ */
+function propagarParaDownstreamF1(jogoIdAlterado) {
+  const downstream = document.querySelectorAll('.bracket-match[data-mode="F1"]');
+  downstream.forEach(card => {
+    const jogoId = card.dataset.jogoId;
+    if (jogoId === jogoIdAlterado) return;
+
+    // Pega os placeholders originais (data-time-a-original e data-time-b-original)
+    // Esses atributos guardam o V73/P101 etc.
+    const origA = card.dataset.timeAOriginal;
+    const origB = card.dataset.timeBOriginal;
+
+    let mudou = false;
+    if (origA && referenciaJogo(origA) === jogoIdAlterado) {
+      atualizarLadoCardF1(card, 'A');
+      mudou = true;
+    }
+    if (origB && referenciaJogo(origB) === jogoIdAlterado) {
+      atualizarLadoCardF1(card, 'B');
+      mudou = true;
+    }
+
+    // Se este card mudou E tem vencedor marcado, propaga pra frente também
+    if (mudou) {
+      const buttons = card.querySelectorAll('.bracket-team');
+      if (buttons[0].classList.contains('winner') || buttons[1].classList.contains('winner')) {
+        atualizarDraftF1(jogoId);
+        propagarParaDownstreamF1(jogoId);
+      }
+    }
+  });
+}
+
+/** Retorna o número do jogo referenciado por V## ou P##, ou null */
+function referenciaJogo(codigo) {
+  const m = String(codigo).match(/^[VP](\d+)$/);
+  return m ? m[1] : null;
+}
+
+/** Atualiza visualmente um lado (A ou B) de um card F1, resolvendo o placeholder. */
+function atualizarLadoCardF1(card, lado) {
+  const idx = lado === 'A' ? 0 : 1;
+  const original = lado === 'A' ? card.dataset.timeAOriginal : card.dataset.timeBOriginal;
+  if (!original) return;
+
+  // Resolve o placeholder usando o draft atual
+  const resolvido = resolverPlaceholderF1(original);
+  const novoCodigo = resolvido || original;
+
+  // Atualiza data-time-X do card
+  if (lado === 'A') card.dataset.timeA = novoCodigo;
+  else card.dataset.timeB = novoCodigo;
+
+  // Se mudou o time efetivo, o vencedor previamente marcado fica inválido — limpa
+  const buttons = card.querySelectorAll('.bracket-team');
+  const btn = buttons[idx];
+  const wasWinner = btn.classList.contains('winner');
+
+  // Atualiza visual: bandeira, nome, classe placeholder/válido
+  const isPlaceholderAgora = isPlaceholder(novoCodigo);
+  btn.disabled = isPlaceholderAgora;
+  btn.classList.toggle('placeholder', isPlaceholderAgora);
+
+  // Substitui conteúdo do botão (bandeira + nome com ▸ se resolvido)
+  const labelHtml = isPlaceholderAgora
+    ? nomeFor(novoCodigo)
+    : `${nomeFor(novoCodigo)}${novoCodigo !== original ? ' <span class="resolved-mark" title="resolvido pelos seus palpites">▸</span>' : ''}`;
+  btn.innerHTML = `${flagFor(novoCodigo)}<span class="bracket-team-name">${labelHtml}</span>`;
+
+  // Se o time mudou (era um placeholder ou outro time), descarta o vencedor antigo
+  if (wasWinner && isPlaceholderAgora) {
+    btn.classList.remove('winner');
+  }
+}
+
+/** Resolve placeholder no contexto F1 usando o estado/draft atual (sem ir ao backend) */
+/**
+ * Calcula a alocação dos "melhores 3ºs" do bracket de forma consistente.
+ * Regra: pega os 8 melhores 3ºs entre os 12 grupos. Distribui pelos slots dos jogos 74/77/79/80/81/82/85/87
+ * na ordem de ranking, respeitando que cada slot só pode ser preenchido por times de grupos específicos.
+ * Retorna um map: { '3-ABCDF': 'BRA', '3-CDFGH': 'MEX', ... }
+ */
+function calcularMelhoresTerceiros(fonteGrupos) {
+  const grupos = fonteGrupos || {};
+  // Coleta todos os 3ºs colocados, com info do grupo
+  const terceiros = [];
+  Object.keys(grupos).forEach(letra => {
+    const t = grupos[letra][2];
+    if (t && t.j > 0) {
+      terceiros.push({ ...t, _letra: letra });
+    }
+  });
+
+  if (terceiros.length === 0) return {};
+
+  // Ranqueia: pontos → saldo → gols feitos
+  terceiros.sort((a, b) => b.pts - a.pts || b.sg - a.sg || b.gp - a.gp);
+
+  // Pega os 8 melhores (ou menos, se faltarem grupos com palpites)
+  const top8 = terceiros.slice(0, 8);
+
+  // Slots de "melhor 3º" do bracket (em ordem dos jogos 73-88)
+  const SLOTS_TERCEIRO = [
+    { codigo: '3-ABCDF', grupos: ['A','B','C','D','F'] },  // jogo 74
+    { codigo: '3-CDFGH', grupos: ['C','D','F','G','H'] },  // jogo 77
+    { codigo: '3-CEFHI', grupos: ['C','E','F','H','I'] },  // jogo 79
+    { codigo: '3-EHIJK', grupos: ['E','H','I','J','K'] },  // jogo 80
+    { codigo: '3-BEFIJ', grupos: ['B','E','F','I','J'] },  // jogo 81
+    { codigo: '3-AEHIJ', grupos: ['A','E','H','I','J'] },  // jogo 82
+    { codigo: '3-EFGIJ', grupos: ['E','F','G','I','J'] },  // jogo 85
+    { codigo: '3-DEIJL', grupos: ['D','E','I','J','L'] }   // jogo 87
+  ];
+
+  // MATCHING DE COBERTURA MÁXIMA via backtracking exaustivo.
+  // Tenta TODAS as alocações possíveis e guarda a melhor (mais slots preenchidos).
+  // Como são 8x8, no pior caso é 8! ≈ 40k iterações — muito rápido.
+  const usados = new Array(top8.length).fill(false);
+  let melhor = { alocacao: {}, count: 0 };
+
+  function tentar(slotIdx, atual, count) {
+    // Poda: se nem preenchendo todos os slots restantes superaria a melhor, pula
+    if (count + (SLOTS_TERCEIRO.length - slotIdx) <= melhor.count) return;
+
+    if (slotIdx === SLOTS_TERCEIRO.length) {
+      if (count > melhor.count) {
+        melhor = { alocacao: { ...atual }, count };
+      }
+      return;
+    }
+
+    const slot = SLOTS_TERCEIRO[slotIdx];
+
+    // Tenta cada time válido (em ordem de ranking) pra este slot
+    for (let i = 0; i < top8.length; i++) {
+      if (usados[i]) continue;
+      if (slot.grupos.indexOf(top8[i]._letra) < 0) continue;
+
+      usados[i] = true;
+      atual[slot.codigo] = top8[i].codigo;
+      tentar(slotIdx + 1, atual, count + 1);
+      usados[i] = false;
+      delete atual[slot.codigo];
+    }
+
+    // Também tenta pular este slot (deixar vazio) — pode liberar times pra slots mais restritos
+    tentar(slotIdx + 1, atual, count);
+  }
+
+  tentar(0, {}, 0);
+  return melhor.alocacao;
+}
+
+function resolverPlaceholderF1(codigo) {
+  if (!codigo) return null;
+  if (NOMES[codigo]) return codigo;
+
+  // 1A, 2A: usa gruposPalpite (já em state.gruposPalpite)
+  const mPos = String(codigo).match(/^([12])([A-L])$/);
+  if (mPos) {
+    const [, pos, letra] = mPos;
+    const grupo = (state.gruposPalpite || {})[letra] || [];
+    const time = grupo[Number(pos) - 1];
+    if (!time || !time.j) return null;
+    return time.codigo;
+  }
+
+  // 3-XXXX: usa a alocação global (calculada uma vez por sessão de render)
+  const m3 = String(codigo).match(/^3-[A-L]+$/);
+  if (m3) {
+    if (!state._cacheTerceirosF1) {
+      state._cacheTerceirosF1 = calcularMelhoresTerceiros(state.gruposPalpite);
+    }
+    return state._cacheTerceirosF1[codigo] || null;
+  }
+
+  // V##/P##: usa o draft em memória
+  const mVP = String(codigo).match(/^([VP])(\d+)$/);
+  if (mVP) {
+    const [, tipo, num] = mVP;
+    const d = state.bracketDraftF1 && state.bracketDraftF1[num];
+    if (!d || !d.vencedor) return null;
+    if (tipo === 'V') return d.vencedor;
+    return d.vencedor === d.timeA ? d.timeB : d.timeA;
+  }
+
+  return null;
+}
+
+function onBracketScoreChangeF1() {
+  // F1 não tem mais campos de placar — função mantida vazia pra compatibilidade
+}
+
+async function propagarBracketF1() {
+  // Função mantida pra compatibilidade; agora propagamos via DOM em propagarParaDownstreamF1
+  const draft = {};
+  document.querySelectorAll('.bracket-match[data-mode="F1"]').forEach(card => {
+    const jogoId = card.dataset.jogoId;
+    const timeA = card.dataset.timeA;
+    const timeB = card.dataset.timeB;
+    const buttons = card.querySelectorAll('.bracket-team');
+    const aWinner = buttons[0].classList.contains('winner');
+    const bWinner = buttons[1].classList.contains('winner');
+    draft[jogoId] = {
+      timeA, timeB,
+      vencedor: aWinner ? timeA : (bWinner ? timeB : null)
+    };
+  });
+  state.bracketDraftF1 = draft;
+}
+
+async function salvarBracketF1() {
+  const cards = document.querySelectorAll('.bracket-match[data-mode="F1"]');
+  const confrontos = [];
+  cards.forEach(card => {
+    const jogoId = card.dataset.jogoId;
+    const timeA = card.dataset.timeA;
+    const timeB = card.dataset.timeB;
+    const buttons = card.querySelectorAll('.bracket-team');
+    const aWinner = buttons[0].classList.contains('winner');
+    const bWinner = buttons[1].classList.contains('winner');
+    let vencedor = null;
+    if (aWinner) vencedor = timeA;
+    else if (bWinner) vencedor = timeB;
+    if (!vencedor) return;
+    // F1 sem placar — backend grava sem o campo Placar
+    confrontos.push({ jogoId, timeA, timeB, vencedor, placarA: null, placarB: null });
+  });
+
+  if (confrontos.length === 0) { toast('Marque pelo menos um vencedor', true); return; }
+
+  const fab = document.querySelector('#bracketF1 .save-fab');
+  if (fab) { fab.disabled = true; fab.textContent = `Salvando ${confrontos.length} palpites...`; }
+  try {
+    const result = await api('salvarBracket', { email: state.user.email, fase: 'F1', confrontos });
+    toast(`Palpite Antecipado salvo: ${result.count} palpite(s)`);
+    invalidateCache(['getMeusPalpites', 'getRanking']);
+    state.meusPalpites = await cachedApi('getMeusPalpites', { email: state.user.email }, { force: true });
+    state.bracketDraftF1 = null;
+  } catch (err) { /* toast já mostrado */ }
+  finally {
+    if (fab) { fab.disabled = false; fab.textContent = 'Salvar Palpite Antecipado ✓'; }
+  }
+}
+
+// ===========================================================
+// MATA-MATA F2 — bracket real (após fim dos grupos)
+// ===========================================================
+async function loadBracketF2() {
+  const el = document.getElementById('bracketF2');
+  showLoadingIfEmpty(el);
+
+  const [jogos, meus, status, grupos, gruposPalpite] = await Promise.all([
+    state.jogos.length ? Promise.resolve(state.jogos) : cachedApi('getJogos'),
+    cachedApi('getMeusPalpites', { email: state.user.email }),
+    state.status ? Promise.resolve(state.status) : cachedApi('getStatus'),
+    cachedApi('getGrupos'),
+    cachedApi('getGruposPalpite', { email: state.user.email })
+  ]);
+  state.jogos = jogos;
+  state.meusPalpites = meus;
+  state.status = status;
+  state.grupos = grupos;
+  state.gruposPalpite = gruposPalpite;
+
+  const editavel = !!status.f2Aberta;
+  // F2 fica disponível só após fim dos grupos (verificamos se todos os jogos de grupo encerraram)
+  const todosGruposEncerraram = jogos
+    .filter(j => String(j.fase || '').startsWith('Grupo'))
+    .every(j => j.status === 'ENCERRADO');
+
+  // Caso 1: ainda não chegou a hora da F2
+  if (!todosGruposEncerraram && !editavel) {
+    el.innerHTML = `
+      <h1 class="screen-title">PALPITE OFICIAL</h1>
+      <div class="screen-sub">REFAÇA O MATA-MATA COM OS TIMES REAIS</div>
+      <div class="bracket-status closed">
+        <div style="font-size:13px;font-weight:700;">⏳ AGUARDANDO FIM DOS GRUPOS</div>
+        <div style="font-size:11px;margin-top:4px;color:var(--ink-dim);font-family:'JetBrains Mono',monospace;letter-spacing:0.3px;">
+          O Palpite Oficial só abre quando todos os jogos da fase de grupos terminarem (~27/jun). Aí você poderá refazer o bracket com os times que realmente classificaram.
+        </div>
+      </div>
+      <div class="bracket-legend">
+        <div>📌 Lembrete: o bônus de confronto sempre vale pelo seu <strong>Palpite Antecipado</strong>. Refazer aqui no Oficial só ajusta a pontuação por placar dos jogos do mata-mata.</div>
+      </div>
+    `;
+    return;
+  }
+
+  // Indexa palpites F1 (pra usar como base/pré-preenchimento) e F2 (estado atual)
+  const palpitesF1 = {};
+  (meus.bracketF1 || []).forEach(p => { palpitesF1[String(p['Jogo ID'])] = p; });
+  const palpitesF2 = {};
+  (meus.bracketF2 || []).forEach(p => { palpitesF2[String(p['Jogo ID'])] = p; });
+
+  // Estratégia de pré-preenchimento da F2:
+  // - Se já tem palpite F2 salvo → usa F2
+  // - Se NÃO tem F2 mas tem F1 → usa F1 como base (mas só onde o time da F1 bate com o time real)
+  const draft = editavel ? state.bracketDraftF2 : null;
+  const resolver = makeResolverPlaceholder(grupos, palpitesF2, draft, false);
+
+  const r32 = enriqueceJogosBracket(jogos.filter(j => j.fase === 'Round of 32').sort((a, b) => Number(a.id) - Number(b.id)), resolver);
+  const r16 = enriqueceJogosBracket(jogos.filter(j => j.fase === 'Oitavas').sort((a, b) => Number(a.id) - Number(b.id)), resolver);
+  const qf = enriqueceJogosBracket(jogos.filter(j => j.fase === 'Quartas').sort((a, b) => Number(a.id) - Number(b.id)), resolver);
+  const sf = enriqueceJogosBracket(jogos.filter(j => j.fase === 'Semifinal').sort((a, b) => Number(a.id) - Number(b.id)), resolver);
+  const fi = enriqueceJogosBracket(jogos.filter(j => j.fase === 'Final'), resolver);
+  const d3 = enriqueceJogosBracket(jogos.filter(j => j.fase === 'Disputa 3º'), resolver);
+
+  const totalF1 = Object.keys(palpitesF1).length;
+  const totalF2 = Object.keys(palpitesF2).length;
+
+  let banner, explicacao;
+  if (editavel) {
+    banner = `
+      <div class="bracket-status open f2">
+        <div style="font-size:13px;font-weight:700;">🔓 PALPITE OFICIAL ABERTO — refaça com os classificados reais</div>
+        <div style="font-size:11px;margin-top:4px;color:var(--ink-dim);font-family:'JetBrains Mono',monospace;letter-spacing:0.3px;">
+          Antecipado: ${totalF1}/32 · Oficial: ${totalF2}/32 · você pode editar várias vezes durante a janela
+        </div>
+      </div>
+    `;
+    explicacao = `
+      <div class="bracket-legend">
+        <div style="font-weight:700;margin-bottom:6px;">Como funciona o Palpite Oficial</div>
+        <div>1. Os times do Round of 32 agora são os <strong>classificados REAIS</strong> da fase de grupos.</div>
+        <div>2. Onde você acertou no Palpite Antecipado, o time aparece com <strong style="color:var(--green)">fundo verde</strong> (já vem pré-marcado como vencedor).</div>
+        <div>3. Onde errou, o time foi substituído pelo correto, mas você precisa marcar o vencedor manualmente.</div>
+        <div>4. Pode editar quantas vezes quiser durante a janela.</div>
+        <hr style="border:none;border-top:1px solid var(--border);margin:10px 0;">
+        <div style="font-weight:700;margin-bottom:6px;">O que vale o Palpite Oficial?</div>
+        <div>• <strong>Pontuação por placar</strong>: placar exato 10 pts / vencedor+saldo 7 pts / só vencedor 5 pts</div>
+        <div>• O bônus de confronto continua vindo do seu Palpite Antecipado original (não muda).</div>
+      </div>
+    `;
+  } else {
+    banner = `
+      <div class="bracket-status closed">
+        <div style="font-size:13px;font-weight:700;">🔒 PALPITE OFICIAL ENCERRADO</div>
+        <div style="font-size:11px;margin-top:4px;color:var(--ink-dim);font-family:'JetBrains Mono',monospace;letter-spacing:0.3px;">
+          ${totalF2 > 0 ? `Você refez ${totalF2}/32 confrontos` : 'Você não fez o Palpite Oficial — vale só o bônus do seu Palpite Antecipado.'}
+        </div>
+      </div>
+    `;
+    explicacao = `
+      <div class="bracket-legend">
+        <div>📋 A janela do Palpite Oficial fechou. ${totalF2 > 0 ? 'Sua pontuação por placar é calculada com base no Palpite Oficial.' : 'Como você não fez o Palpite Oficial, ganha só o bônus de confronto do Antecipado (sem pontuação por placar do mata-mata).'}</div>
+      </div>
+    `;
+  }
+
+  el.innerHTML = `
+    <h1 class="screen-title">PALPITE OFICIAL</h1>
+    <div class="screen-sub">BRACKET COM TIMES REAIS · VALE A PONTUAÇÃO POR PLACAR</div>
+
+    ${banner}
+    ${explicacao}
+
+    ${renderBracketSecaoF2('ROUND OF 32', '16 JOGOS', r32, palpitesF2, palpitesF1, !editavel)}
+    ${renderBracketSecaoF2('OITAVAS DE FINAL', '8 JOGOS', r16, palpitesF2, palpitesF1, !editavel)}
+    ${renderBracketSecaoF2('QUARTAS DE FINAL', '4 JOGOS', qf, palpitesF2, palpitesF1, !editavel)}
+    ${renderBracketSecaoF2('SEMIFINAIS', '2 JOGOS', sf, palpitesF2, palpitesF1, !editavel)}
+    ${renderBracketSecaoF2('DISPUTA 3º LUGAR', '1 JOGO', d3, palpitesF2, palpitesF1, !editavel)}
+    ${renderBracketSecaoF2('FINAL', '1 JOGO', fi, palpitesF2, palpitesF1, !editavel)}
+
+    ${editavel ? `<button class="save-fab" onclick="salvarBracketF2()">Salvar Palpite Oficial ✓</button>` : ''}
+  `;
+}
+
+function renderBracketSecaoF2(titulo, meta, jogosDaFase, palpitesF2, palpitesF1, locked) {
+  return `
+    <div class="phase-header">${titulo}<span class="meta">${meta}</span></div>
+    <div class="bracket-grid">
+      ${jogosDaFase.map(j => renderBracketMatchF2(j, palpitesF2, palpitesF1, locked)).join('')}
+    </div>
+  `;
+}
+
+/** Renderiza um card do bracket F2:
+ * - Se F1 acertou o time A real → fundo verde no botão A (e marcado como vencedor por padrão se F1 escolheu A)
+ * - Se F1 errou o time → mostra o time REAL (substituído), fundo normal
+ * - Placar e vencedor: usa F2 se existir, senão F1 (como ponto de partida) */
+function renderBracketMatchF2(j, palpitesF2, palpitesF1, locked) {
+  const palpiteF2 = palpitesF2[String(j.id)];
+  const palpiteF1 = palpitesF1[String(j.id)];
+
+  // Times reais (já resolvidos via grupos reais)
+  const codA = j.timeAEfetivo || j.timeA;
+  const codB = j.timeBEfetivo || j.timeB;
+  const phA = isPlaceholder(codA);
+  const phB = isPlaceholder(codB);
+
+  // Quais times o usuário palpitou na F1 pra esse jogo?
+  const f1TimeA = palpiteF1 ? palpiteF1['Time A previsto'] : null;
+  const f1TimeB = palpiteF1 ? palpiteF1['Time B previsto'] : null;
+  // Acertou o time real no slot A ou B?
+  const acertouA = f1TimeA === codA || f1TimeB === codA;
+  const acertouB = f1TimeA === codB || f1TimeB === codB;
+
+  // Estado: F2 (se existir) tem prioridade sobre F1 como base
+  let vencedorPrevisto, placar, placarA, placarB;
+  if (palpiteF2) {
+    vencedorPrevisto = palpiteF2['Vencedor previsto'];
+    placar = String(palpiteF2['Placar (a×b)'] || '');
+    [placarA, placarB] = placar.includes('×') ? placar.split('×') : ['', ''];
+  } else if (palpiteF1) {
+    // Usa F1 como base: vencedor SÓ vale se o time previsto realmente é um dos dois reais
+    const vF1 = palpiteF1['Vencedor previsto'];
+    if (vF1 === codA || vF1 === codB) vencedorPrevisto = vF1;
+    placar = String(palpiteF1['Placar (a×b)'] || '');
+    // Se a ordem F1 difere da F2 (A/B trocou), inverte placares
+    if (placar.includes('×')) {
+      const [pA, pB] = placar.split('×');
+      if (f1TimeA === codA) { placarA = pA; placarB = pB; }
+      else if (f1TimeA === codB) { placarA = pB; placarB = pA; }
+      else { placarA = ''; placarB = ''; }
+    } else {
+      placarA = placarB = '';
+    }
+  } else {
+    vencedorPrevisto = null;
+    placarA = placarB = '';
+  }
+
+  // Draft em memória (edições não salvas)
+  const draft = state.bracketDraftF2 && state.bracketDraftF2[String(j.id)];
+  if (draft && !locked) {
+    vencedorPrevisto = draft.vencedor;
+    placarA = draft.placarA;
+    placarB = draft.placarB;
+  }
+
+  const aSelected = vencedorPrevisto === codA;
+  const bSelected = vencedorPrevisto === codB;
+
+  // Classes especiais: se F1 acertou o time, marca o botão com classe .f1-correct (fundo verde sutil)
+  const classA = `${aSelected ? 'winner' : (acertouA ? 'f1-correct' : '')} ${phA ? 'placeholder' : ''}`.trim();
+  const classB = `${bSelected ? 'winner' : (acertouB ? 'f1-correct' : '')} ${phB ? 'placeholder' : ''}`.trim();
+
+  // Label com ✓ se F1 acertou
+  const labelA = phA ? nomeFor(codA) : `${nomeFor(codA)}${acertouA ? ' <span class="resolved-mark" title="você acertou este time na F1">✓</span>' : ''}`;
+  const labelB = phB ? nomeFor(codB) : `${nomeFor(codB)}${acertouB ? ' <span class="resolved-mark" title="você acertou este time na F1">✓</span>' : ''}`;
+
+  // Linha de referência F1: o que ele palpitou originalmente
+  let referenciaF1 = '';
+  if (palpiteF1) {
+    const acertouAmbos = acertouA && acertouB;
+    const placarF1 = palpiteF1['Placar (a×b)'] || '';
+    const venceuF1 = nomeFor(palpiteF1['Vencedor previsto']);
+    referenciaF1 = `
+      <div class="bracket-f1-ref ${acertouAmbos ? 'acertou' : ''}">
+        <span class="bracket-f1-label">F1:</span>
+        ${acertouAmbos
+          ? `<span style="color:var(--gold);">✓ confronto acertado</span>`
+          : `<span style="color:var(--ink-dim);">${nomeFor(palpiteF1['Time A previsto'])} × ${nomeFor(palpiteF1['Time B previsto'])}</span>`
+        }
+        <span style="color:var(--ink-dim);margin-left:auto;">vencedor: ${venceuF1}${placarF1 ? ' · ' + placarF1 : ''}</span>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="bracket-match" data-jogo-id="${j.id}" data-time-a="${codA}" data-time-b="${codB}" data-mode="F2">
+      <div class="bracket-meta">JOGO ${j.id}</div>
+      <div class="bracket-row">
+        <button class="bracket-team ${classA}"
+                onclick="toggleBracketWinnerF2(${j.id}, 'A')"
+                ${locked || phA ? 'disabled' : ''}>
+          ${flagFor(codA)}
+          <span class="bracket-team-name">${labelA}</span>
+        </button>
+        <input class="bracket-score" type="number" min="0" max="9"
+               value="${placarA}" placeholder="-"
+               data-jogo="${j.id}" data-lado="A"
+               onchange="onBracketScoreChangeF2()"
+               ${locked ? 'disabled' : ''}>
+      </div>
+      <div class="bracket-row">
+        <button class="bracket-team ${classB}"
+                onclick="toggleBracketWinnerF2(${j.id}, 'B')"
+                ${locked || phB ? 'disabled' : ''}>
+          ${flagFor(codB)}
+          <span class="bracket-team-name">${labelB}</span>
+        </button>
+        <input class="bracket-score" type="number" min="0" max="9"
+               value="${placarB}" placeholder="-"
+               data-jogo="${j.id}" data-lado="B"
+               onchange="onBracketScoreChangeF2()"
+               ${locked ? 'disabled' : ''}>
+      </div>
+      ${referenciaF1}
+    </div>
+  `;
+}
+
+function toggleBracketWinnerF2(jogoId, lado) {
+  const card = document.querySelector(`.bracket-match[data-jogo-id="${jogoId}"][data-mode="F2"]`);
+  if (!card) return;
+  const buttons = card.querySelectorAll('.bracket-team');
+  const idx = lado === 'A' ? 0 : 1;
+  if (buttons[idx].classList.contains('winner')) {
+    buttons[idx].classList.remove('winner');
+  } else {
+    buttons[0].classList.remove('winner');
+    buttons[1].classList.remove('winner');
+    buttons[idx].classList.add('winner');
+  }
+  propagarBracketF2();
+}
+
+function onBracketScoreChangeF2() {
+  if (!state.bracketDraftF2) state.bracketDraftF2 = {};
+  document.querySelectorAll('.bracket-match[data-mode="F2"]').forEach(card => {
+    const jogoId = card.dataset.jogoId;
+    const inputs = card.querySelectorAll('.bracket-score');
+    if (!state.bracketDraftF2[jogoId]) {
+      state.bracketDraftF2[jogoId] = {
+        timeA: card.dataset.timeA, timeB: card.dataset.timeB,
+        vencedor: null, placarA: '', placarB: ''
+      };
+    }
+    state.bracketDraftF2[jogoId].placarA = inputs[0] ? inputs[0].value : '';
+    state.bracketDraftF2[jogoId].placarB = inputs[1] ? inputs[1].value : '';
+  });
+}
+
+async function propagarBracketF2() {
+  const draft = {};
+  document.querySelectorAll('.bracket-match[data-mode="F2"]').forEach(card => {
+    const jogoId = card.dataset.jogoId;
+    const timeA = card.dataset.timeA;
+    const timeB = card.dataset.timeB;
+    const buttons = card.querySelectorAll('.bracket-team');
+    const aWinner = buttons[0].classList.contains('winner');
+    const bWinner = buttons[1].classList.contains('winner');
+    const inputs = card.querySelectorAll('.bracket-score');
+    draft[jogoId] = {
+      timeA, timeB,
+      vencedor: aWinner ? timeA : (bWinner ? timeB : null),
+      placarA: inputs[0] ? inputs[0].value : '',
+      placarB: inputs[1] ? inputs[1].value : ''
+    };
+  });
+  state.bracketDraftF2 = draft;
+  const scrollY = window.scrollY;
+  await loadBracketF2();
+  window.scrollTo(0, scrollY);
+}
+
+async function salvarBracketF2() {
+  const cards = document.querySelectorAll('.bracket-match[data-mode="F2"]');
+  const confrontos = [];
+  cards.forEach(card => {
+    const jogoId = card.dataset.jogoId;
+    const timeA = card.dataset.timeA;
+    const timeB = card.dataset.timeB;
+    const buttons = card.querySelectorAll('.bracket-team');
+    const aWinner = buttons[0].classList.contains('winner');
+    const bWinner = buttons[1].classList.contains('winner');
+    let vencedor = null;
+    if (aWinner) vencedor = timeA;
+    else if (bWinner) vencedor = timeB;
+    if (!vencedor) return;
+    const inputA = card.querySelector('input[data-lado="A"]');
+    const inputB = card.querySelector('input[data-lado="B"]');
+    const placarA = inputA && inputA.value !== '' ? Number(inputA.value) : null;
+    const placarB = inputB && inputB.value !== '' ? Number(inputB.value) : null;
+    confrontos.push({ jogoId, timeA, timeB, vencedor, placarA, placarB });
+  });
+
+  if (confrontos.length === 0) { toast('Marque pelo menos um vencedor', true); return; }
+
+  const fab = document.querySelector('#bracketF2 .save-fab');
+  if (fab) { fab.disabled = true; fab.textContent = `Salvando ${confrontos.length} palpites...`; }
+  try {
+    const result = await api('salvarBracket', { email: state.user.email, fase: 'F2', confrontos });
+    toast(`Palpite Oficial salvo: ${result.count} palpite(s)`);
+    invalidateCache(['getMeusPalpites', 'getRanking']);
+    state.meusPalpites = await cachedApi('getMeusPalpites', { email: state.user.email }, { force: true });
+    state.bracketDraftF2 = null;
+  } catch (err) { /* toast já mostrado */ }
+  finally {
+    if (fab) { fab.disabled = false; fab.textContent = 'Salvar Palpite Oficial ✓'; }
+  }
+}
+
+
+// ===========================================================
+// MEUS PALPITES (consulta — todos os jogos com palpite)
+// ===========================================================
+async function loadMeusPalpites() {
+  const el = document.getElementById('meuspalpites');
+  showLoadingIfEmpty(el);
+
+  const [jogos, meus, gruposPalpite, status] = await Promise.all([
+    state.jogos.length ? Promise.resolve(state.jogos) : cachedApi('getJogos'),
+    cachedApi('getMeusPalpites', { email: state.user.email }),
+    cachedApi('getGruposPalpite', { email: state.user.email }),
+    state.status ? Promise.resolve(state.status) : cachedApi('getStatus')
+  ]);
+  state.jogos = jogos;
+  state.meusPalpites = meus;
+  state.gruposPalpite = gruposPalpite;
+  state.status = status;
+  state._cacheTerceirosF1 = null;  // força recálculo dos melhores 3ºs com palpites atualizados
+
+  // Indexa palpites de grupos por jogoId
+  const palpitesGrupos = {};
+  (meus.grupos || []).forEach(p => {
+    palpitesGrupos[String(p['Jogo ID'])] = p;
+  });
+
+  // Indexa palpites F1 e F2 SEPARADAMENTE
+  const palpitesF1 = {};
+  (meus.bracketF1 || []).forEach(p => { palpitesF1[String(p['Jogo ID'])] = p; });
+  const palpitesF2 = {};
+  (meus.bracketF2 || []).forEach(p => { palpitesF2[String(p['Jogo ID'])] = p; });
+
+  // Separa jogos por fase
+  const grupoJogos = jogos.filter(j => String(j.fase || '').startsWith('Grupo'))
+    .sort((a, b) => Number(a.id) - Number(b.id));
+  const r32 = jogos.filter(j => j.fase === 'Round of 32').sort((a, b) => Number(a.id) - Number(b.id));
+  const r16 = jogos.filter(j => j.fase === 'Oitavas').sort((a, b) => Number(a.id) - Number(b.id));
+  const qf = jogos.filter(j => j.fase === 'Quartas').sort((a, b) => Number(a.id) - Number(b.id));
+  const sf = jogos.filter(j => j.fase === 'Semifinal').sort((a, b) => Number(a.id) - Number(b.id));
+  const f = jogos.filter(j => j.fase === 'Final');
+  const d3 = jogos.filter(j => j.fase === 'Disputa 3º');
+
+  // Conta palpites preenchidos
+  const totalGrupos = grupoJogos.filter(j => palpitesGrupos[String(j.id)]).length;
+  const totalF1 = Object.keys(palpitesF1).length;
+  const totalF2 = Object.keys(palpitesF2).length;
+
+  // Helper: renderiza um bloco de mata-mata (F1 ou F2) com todas as fases
+  function renderBlocoMataMata(palpitesFase) {
+    return `
+      <div class="phase-header">ROUND OF 32<span class="meta">16 JOGOS</span></div>
+      ${r32.map(j => renderJogoConsulta(j, palpitesFase[String(j.id)], 'bracket')).join('')}
+
+      <div class="phase-header">OITAVAS<span class="meta">8 JOGOS</span></div>
+      ${r16.map(j => renderJogoConsulta(j, palpitesFase[String(j.id)], 'bracket')).join('')}
+
+      <div class="phase-header">QUARTAS<span class="meta">4 JOGOS</span></div>
+      ${qf.map(j => renderJogoConsulta(j, palpitesFase[String(j.id)], 'bracket')).join('')}
+
+      <div class="phase-header">SEMIFINAIS<span class="meta">2 JOGOS</span></div>
+      ${sf.map(j => renderJogoConsulta(j, palpitesFase[String(j.id)], 'bracket')).join('')}
+
+      <div class="phase-header">DISPUTA 3º LUGAR<span class="meta">1 JOGO</span></div>
+      ${d3.map(j => renderJogoConsulta(j, palpitesFase[String(j.id)], 'bracket')).join('')}
+
+      <div class="phase-header">FINAL<span class="meta">19/JUL</span></div>
+      ${f.map(j => renderJogoConsulta(j, palpitesFase[String(j.id)], 'bracket')).join('')}
+    `;
+  }
+
+  // Banner explicativo F2 (depende do estado)
+  const f2Aberta = state.status && state.status.f2Aberta;
+  const f2Banner = totalF2 === 0
+    ? `<div class="meus-palpites-banner f2-vazia">
+         ${f2Aberta
+           ? '⚡ <strong>Palpite Oficial aberto:</strong> vá na aba <strong>Palpite Oficial</strong> e refaça o bracket com os times reais pra valer a pontuação por placar.'
+           : '⏳ O Palpite Oficial abre só depois que os grupos terminarem. Por enquanto, vale o bônus do seu Palpite Antecipado.'}
+       </div>`
+    : '';
+
+  el.innerHTML = `
+    <h1 class="screen-title">MEUS PALPITES</h1>
+    <div class="screen-sub">CONSULTA · TODOS OS JOGOS E SEUS PALPITES</div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Fase de Grupos</div>
+        <div class="stat-value">${totalGrupos}<span style="font-size:14px;color:var(--ink-dim)">/${grupoJogos.length}</span></div>
+        <div class="stat-meta">palpites feitos</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Palpite Antecipado</div>
+        <div class="stat-value">${totalF1}<span style="font-size:14px;color:var(--ink-dim)">/32</span></div>
+        <div class="stat-meta">no escuro · bônus</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Palpite Oficial</div>
+        <div class="stat-value">${totalF2}<span style="font-size:14px;color:var(--ink-dim)">/32</span></div>
+        <div class="stat-meta">com times reais · placar</div>
+      </div>
+    </div>
+
+    <!-- FASE DE GRUPOS -->
+    <div class="meus-palpites-secao">
+      <div class="meus-palpites-titulo">
+        <span class="meus-palpites-titulo-tag">⚽</span>
+        FASE DE GRUPOS
+      </div>
+      <div class="meus-palpites-subtitulo">${grupoJogos.length} jogos · pontuação por placar (10/7/5 pts) + 2 pts por classificado</div>
+      ${grupoJogos.map(j => renderJogoConsulta(j, palpitesGrupos[String(j.id)], 'grupos')).join('')}
+    </div>
+
+    <!-- PALPITE ANTECIPADO -->
+    <div class="meus-palpites-secao">
+      <div class="meus-palpites-titulo f1">
+        <span class="meus-palpites-titulo-tag">🔮</span>
+        PALPITE ANTECIPADO (NO ESCURO)
+      </div>
+      <div class="meus-palpites-subtitulo">Feito antes da Copa · vale BÔNUS por confronto acertado (+3/+5/+10/+15/+25)</div>
+      ${totalF1 === 0
+        ? `<div class="meus-palpites-vazio">Você ainda não fez seu Palpite Antecipado. Vá na aba <strong>Palpite Antecipado</strong>.</div>`
+        : renderBlocoMataMata(palpitesF1)}
+    </div>
+
+    <!-- PALPITE OFICIAL -->
+    <div class="meus-palpites-secao">
+      <div class="meus-palpites-titulo f2">
+        <span class="meus-palpites-titulo-tag">⚡</span>
+        PALPITE OFICIAL (TIMES REAIS)
+      </div>
+      <div class="meus-palpites-subtitulo">Refeito após o fim dos grupos · vale PONTUAÇÃO POR PLACAR (10/7/5 pts)</div>
+      ${f2Banner}
+      ${totalF2 === 0 && !f2Aberta
+        ? ''
+        : (totalF2 === 0
+            ? ''
+            : renderBlocoMataMata(palpitesF2))}
+    </div>
+  `;
+}
+
+/** Resolve placeholder no contexto de Meus Palpites:
+ * - 1A/2A: usa palpites de grupos do usuário
+ * - 3-XYZ: usa a alocação de melhores 3ºs pelos palpites
+ * - V##/P##: usa o palpite salvo de bracket (prefere F2, fallback F1)
+ */
+function resolverPlaceholderMeusPalpites(codigo) {
+  if (!codigo) return null;
+  if (NOMES[codigo]) return codigo;
+
+  // 1A, 2A
+  const mPos = String(codigo).match(/^([12])([A-L])$/);
+  if (mPos) {
+    const [, pos, letra] = mPos;
+    const grupo = (state.gruposPalpite || {})[letra] || [];
+    const time = grupo[Number(pos) - 1];
+    if (!time || !time.j) return null;
+    return time.codigo;
+  }
+
+  // 3-XYZ — alocação ótima dos melhores 3ºs
+  if (/^3-[A-L]+$/.test(String(codigo))) {
+    if (!state._cacheTerceirosF1) {
+      state._cacheTerceirosF1 = calcularMelhoresTerceiros(state.gruposPalpite);
+    }
+    return state._cacheTerceirosF1[codigo] || null;
+  }
+
+  // V##/P## — usa o palpite salvo (prefere F2, fallback F1)
+  const mVP = String(codigo).match(/^([VP])(\d+)$/);
+  if (mVP) {
+    const [, tipo, num] = mVP;
+    const meus = state.meusPalpites || {};
+    const palpiteF2 = (meus.bracketF2 || []).find(p => String(p['Jogo ID']) === String(num));
+    const palpiteF1 = (meus.bracketF1 || []).find(p => String(p['Jogo ID']) === String(num));
+    const p = palpiteF2 || palpiteF1;
+    if (!p || !p['Vencedor previsto']) return null;
+    const vencedor = p['Vencedor previsto'];
+    if (tipo === 'V') return vencedor;
+    const ta = p['Time A previsto'];
+    const tb = p['Time B previsto'];
+    return vencedor === ta ? tb : ta;
+  }
+
+  return null;
+}
+
+/** Renderiza linha compacta: confronto + status real + palpite */
+function renderJogoConsulta(jogo, palpite, tipo) {
+  const isDone = jogo.status === 'ENCERRADO';
+  const isLive = jogo.status === 'AO VIVO';
+  const dt = jogo.dataHora ? new Date(jogo.dataHora) : null;
+  const dataStr = dt ? dt.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) : '-';
+  const horaStr = dt ? dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '';
+
+  // Placar real (se já tem)
+  const placarReal = (jogo.golsA != null && jogo.golsB != null)
+    ? `${jogo.golsA}×${jogo.golsB}`
+    : (isLive ? 'AO VIVO' : 'vs');
+
+  // Times exibidos: pro mata-mata, prefere o que o usuário palpitou.
+  // Se ainda for placeholder (1A, 3-XYZ, V73...), resolve pelos palpites salvos.
+  let timeAExibido = jogo.timeA;
+  let timeBExibido = jogo.timeB;
+  if (tipo === 'bracket' && palpite) {
+    timeAExibido = palpite['Time A previsto'] || jogo.timeA;
+    timeBExibido = palpite['Time B previsto'] || jogo.timeB;
+  }
+  // Fallback final: resolve placeholders restantes usando palpites salvos
+  if (tipo === 'bracket' && isPlaceholder(timeAExibido)) {
+    timeAExibido = resolverPlaceholderMeusPalpites(timeAExibido) || timeAExibido;
+  }
+  if (tipo === 'bracket' && isPlaceholder(timeBExibido)) {
+    timeBExibido = resolverPlaceholderMeusPalpites(timeBExibido) || timeBExibido;
+  }
+
+  // Palpite — formato difere se for grupos ou bracket
+  let palpiteStr = '—';
+  let acerto = null;
+  if (palpite) {
+    if (tipo === 'grupos') {
+      palpiteStr = `${palpite['Palpite A']}×${palpite['Palpite B']}`;
+      if (isDone) {
+        acerto = (Number(palpite['Palpite A']) === Number(jogo.golsA) &&
+                  Number(palpite['Palpite B']) === Number(jogo.golsB)) ? 'exato'
+               : (Math.sign(palpite['Palpite A'] - palpite['Palpite B']) === Math.sign(jogo.golsA - jogo.golsB) ? 'parcial' : 'erro');
+      }
+    } else {
+      const placar = palpite['Placar (a×b)'] || '';
+      const vencedorNome = nomeFor(palpite['Vencedor previsto']);
+      palpiteStr = placar
+        ? `${placar} · ${vencedorNome}`
+        : `vencedor: ${vencedorNome}`;
+    }
+  }
+
+  const acertoClasse = acerto ? `acerto-${acerto}` : '';
+
+  return `
+    <div class="palpite-row ${acertoClasse}">
+      <div class="palpite-data">
+        <span>${dataStr}</span>
+        <span style="font-size:9px;color:var(--ink-dim)">${horaStr}</span>
+      </div>
+      <div class="palpite-times">
+        <div class="palpite-time-side">
+          ${flagFor(timeAExibido)}
+          <span>${nomeFor(timeAExibido)}</span>
+        </div>
+        <div class="palpite-placar ${isLive ? 'live' : ''}">${placarReal}</div>
+        <div class="palpite-time-side right">
+          <span>${nomeFor(timeBExibido)}</span>
+          ${flagFor(timeBExibido)}
+        </div>
+      </div>
+      <div class="palpite-meu">
+        <div class="palpite-meu-label">PALPITE</div>
+        <div class="palpite-meu-valor ${!palpite ? 'vazio' : ''}">${palpiteStr}</div>
+      </div>
+    </div>
+  `;
+}
+
+// ===========================================================
+// ESPECIAIS
+// ===========================================================
+async function loadEspeciais() {
+  const el = document.getElementById('especiais');
+  showLoadingIfEmpty(el);
+
+  if (!state.status) state.status = await cachedApi('getStatus');
+  if (!Object.keys(state.grupos).length) state.grupos = await cachedApi('getGrupos');
+  state.meusPalpites = await cachedApi('getMeusPalpites', { email: state.user.email });
+
+  const aberto = state.status.especiaisAbertos;
+  const atual = state.meusPalpites.especiais || {};
+  const inicioCopa = state.status.inicioCopa ? new Date(state.status.inicioCopa) : null;
+
+  // Calcula quanto falta pra travar (se ainda está aberto)
+  let avisoPrazo = '';
+  if (aberto && inicioCopa) {
+    const diffMs = inicioCopa - new Date();
+    const dias = Math.floor(diffMs / 86400000);
+    const horas = Math.floor((diffMs % 86400000) / 3600000);
+    if (dias > 0) {
+      avisoPrazo = `Trava em ${dias} dia${dias > 1 ? 's' : ''} (11/jun, no 1º jogo da Copa)`;
+    } else if (horas > 0) {
+      avisoPrazo = `⚠️ TRAVA EM ${horas}H — última chance de palpitar`;
+    } else {
+      avisoPrazo = '⚠️ TRAVA EM MENOS DE 1H';
+    }
+  }
+
+  // Lista de TODOS os 48 times reais (puxados dos grupos), com nome completo
+  const times = [];
+  Object.values(state.grupos).forEach(grupoTimes => {
+    grupoTimes.forEach(t => {
+      // Ignora placeholders de play-off
+      if (!t.codigo.startsWith('PO')) {
+        times.push({ codigo: t.codigo, nome: t.nome });
+      }
+    });
+  });
+  times.sort((a, b) => a.nome.localeCompare(b.nome));
+
+  el.innerHTML = `
+    <h1 class="screen-title">ARTILHEIRO</h1>
+    <div class="screen-sub">${aberto ? 'PALPITE ABERTO' : '🔒 TRAVADO'}</div>
+
+    ${aberto
+      ? `<div style="background:rgba(255,199,44,0.08);border-left:3px solid var(--gold);padding:12px 14px;margin-bottom:20px;font-size:12px;line-height:1.5;color:var(--ink);">
+           <strong style="color:var(--gold);">⏰ ${avisoPrazo}</strong><br>
+           <span style="color:var(--ink-dim);">Depois disso, não dá mais pra mudar. Acertar o artilheiro vale <strong>20 pts</strong>.</span>
+         </div>`
+      : `<div style="background:rgba(232,38,76,0.06);border-left:3px solid var(--red);padding:12px 14px;margin-bottom:20px;font-size:12px;line-height:1.5;color:var(--ink-dim);">
+           🔒 O palpite do artilheiro trava no 1º jogo da Copa (11/jun) e não pode mais ser alterado.
+         </div>`
+    }
+
+    <div class="special-card">
+      <div class="special-icon">⚽</div>
+      <div class="special-label">QUEM SERÁ O ARTILHEIRO DA COPA?</div>
+      <div class="special-pts">20 PTS se acertar</div>
+      <input type="text" id="esp-artilheiro" placeholder="Nome do jogador (ex: Vinícius Júnior)"
+             value="${atual['Artilheiro'] || ''}" ${aberto ? '' : 'disabled'}>
+      <div style="font-size:10px;color:var(--ink-dim);margin-top:8px;font-style:italic;text-align:center;">
+        💡 Dica: digite o nome completo como você aposta — vai ser comparado depois com o artilheiro oficial.
+      </div>
+    </div>
+
+    ${aberto ? '<button class="save-fab" onclick="salvarEspeciais()">Salvar palpite ✓</button>' : ''}
+  `;
+}
+
+async function salvarEspeciais() {
+  const fab = document.querySelector('#especiais .save-fab');
+  if (!fab) return;
+  fab.disabled = true;
+  try {
+    await api('salvarEspeciais', {
+      email: state.user.email,
+      campeao: '',
+      vice: '',
+      artilheiro: document.getElementById('esp-artilheiro').value
+    });
+    invalidateCache(['getMeusPalpites']);
+    toast('Palpite do artilheiro salvo');
+  } finally {
+    fab.disabled = false;
+  }
+}
+
+// ===========================================================
+// RANKING
+// ===========================================================
+async function loadRanking() {
+  const el = document.getElementById('ranking');
+  showLoadingIfEmpty(el);
+  state.ranking = await cachedApi('getRanking');
+
+  el.innerHTML = `
+    <h1 class="screen-title">RANKING</h1>
+    <div class="screen-sub">${state.ranking.length} PARTICIPANTES</div>
+    ${state.ranking.map(r => `
+      <div class="ranking-row ${r.Email === state.user.email ? 'you' : ''}">
+        <div class="rank-pos">${r['Posição']}</div>
+        <div>
+          <div class="rank-name">${r.Nome}${r.Email === state.user.email ? ' (você)' : ''}</div>
+          <div class="rank-dept">${r.Departamento || ''}</div>
+        </div>
+        <div class="rank-pts">${r['Pontos Totais']}<small>PTS</small></div>
+      </div>
+    `).join('')}
+  `;
+}
+
+// ===========================================================
+// HELPERS
+// ===========================================================
+// Mapeia código FIFA → código ISO de 2 letras (pro flagcdn.com)
+const FIFA_TO_ISO = {
+  BRA:'br', ARG:'ar', FRA:'fr', ENG:'gb-eng', ESP:'es', GER:'de',
+  POR:'pt', NED:'nl', BEL:'be', CRO:'hr', USA:'us',
+  MEX:'mx', CAN:'ca', JPN:'jp', KOR:'kr', AUS:'au', IRN:'ir',
+  KSA:'sa', QAT:'qa', MAR:'ma', SEN:'sn', EGY:'eg', GHA:'gh',
+  CIV:'ci', ALG:'dz', TUN:'tn', RSA:'za', CPV:'cv', CZE:'cz',
+  SUI:'ch', BIH:'ba', NOR:'no', AUT:'at', COL:'co', URU:'uy',
+  PAR:'py', ECU:'ec', SCO:'gb-sct', TUR:'tr', JOR:'jo', UZB:'uz',
+  NZL:'nz', PAN:'pa', HAI:'ht', CUR:'cw',
+  SWE:'se', IRQ:'iq', COD:'cd'  // Suécia, Iraque, DR Congo
+};
+
+// Mapeia código → nome em português
+const NOMES = {
+  BRA:'Brasil', ARG:'Argentina', FRA:'França', ENG:'Inglaterra', ESP:'Espanha', GER:'Alemanha',
+  POR:'Portugal', NED:'Países Baixos', BEL:'Bélgica', CRO:'Croácia', USA:'EUA',
+  MEX:'México', CAN:'Canadá', JPN:'Japão', KOR:'Coreia do Sul', AUS:'Austrália', IRN:'Irã',
+  KSA:'Arábia Saudita', QAT:'Catar', MAR:'Marrocos', SEN:'Senegal', EGY:'Egito', GHA:'Gana',
+  CIV:'Costa do Marfim', ALG:'Argélia', TUN:'Tunísia', RSA:'África do Sul', CPV:'Cabo Verde',
+  CZE:'Tchéquia', SUI:'Suíça', BIH:'Bósnia e H.', NOR:'Noruega', AUT:'Áustria',
+  COL:'Colômbia', URU:'Uruguai', PAR:'Paraguai', ECU:'Equador', SCO:'Escócia',
+  TUR:'Turquia', JOR:'Jordânia', UZB:'Uzbequistão', NZL:'Nova Zelândia', PAN:'Panamá',
+  HAI:'Haiti', CUR:'Curaçao',
+  SWE:'Suécia', IRQ:'Iraque', COD:'DR Congo'
+};
+
+/**
+ * Retorna HTML de bandeira (img SVG). Funciona em Windows/iOS/Android.
+ * Fonte: flagcdn.com (CDN gratuito, sem cadastro).
+ * Se for placeholder do bracket, retorna ícone genérico.
+ */
+function flagFor(codigo) {
+  const iso = FIFA_TO_ISO[codigo];
+  if (!iso) {
+    // Placeholder do bracket — mostra ponto de interrogação estilizado
+    if (isPlaceholder(codigo)) return `<span class="flag-fallback">?</span>`;
+    return `<span class="flag-fallback">${codigo || '?'}</span>`;
+  }
+  return `<img class="flag-img" src="https://flagcdn.com/w40/${iso}.png" alt="${codigo}" loading="lazy">`;
+}
+
+/**
+ * Retorna o nome em português do time pelo código.
+ * Também resolve placeholders do bracket: 1A → "1º do A", V73 → "Vencedor 73", etc.
+ */
+function nomeFor(codigo) {
+  if (!codigo) return '?';
+  // Time normal
+  if (NOMES[codigo]) return NOMES[codigo];
+  // Placeholder: 1A, 2B
+  const mPos = String(codigo).match(/^([12])([A-L])$/);
+  if (mPos) return `${mPos[1] === '1' ? '1º' : '2º'} do Grupo ${mPos[2]}`;
+  // Placeholder: 3-ABCDF
+  const m3 = String(codigo).match(/^3-([A-L]+)$/);
+  if (m3) return `Melhor 3º (${m3[1].split('').join('/')})`;
+  // Placeholder: V73 (vencedor partida 73)
+  const mV = String(codigo).match(/^V(\d+)$/);
+  if (mV) return `Vencedor jogo ${mV[1]}`;
+  // Placeholder: P101 (perdedor partida 101)
+  const mP = String(codigo).match(/^P(\d+)$/);
+  if (mP) return `Perdedor jogo ${mP[1]}`;
+  return codigo;
+}
+
+/**
+ * Indica se um código é um placeholder (não um time real)
+ */
+function isPlaceholder(codigo) {
+  if (!codigo) return true;
+  if (NOMES[codigo]) return false;
+  return /^([12][A-L]|3-[A-L]+|[VP]\d+)$/.test(codigo);
+}
+
+function ptsParaPalpite(j, pA, pB) {
+  const ga = Number(j.golsA), gb = Number(j.golsB);
+  const a = Number(pA), b = Number(pB);
+  if (ga === a && gb === b) return 10;
+  const vR = ga > gb ? 'A' : (gb > ga ? 'B' : 'E');
+  const vP = a > b ? 'A' : (b > a ? 'B' : 'E');
+  if (vR === vP && (ga - gb) === (a - b)) return 7;
+  if (vR === vP) return 5;
+  return 0;
+}
+
+// ===========================================================
+// INIT — auto-login se já estiver salvo
+// ===========================================================
+window.addEventListener('DOMContentLoaded', () => {
+  if (API_URL === 'COLE_AQUI_A_URL_DA_WEB_APP_DO_APPS_SCRIPT') {
+    document.getElementById('login-error').textContent =
+      'Configure a URL da API no início do arquivo HTML.';
+    return;
+  }
+  const saved = localStorage.getItem('bolao_user');
+  if (saved) {
+    try {
+      state.user = JSON.parse(saved);
+      showApp();
+    } catch (err) { /* ignora */ }
+  }
+
+  // Auto-refresh do dashboard a cada 30s se houver jogo ao vivo
+  setInterval(() => {
+    const onDashboard = document.querySelector('.tab-btn.active')?.dataset.tab === 'dashboard';
+    if (onDashboard && state.user) loadDashboard();
+  }, 30000);
+});
+</script>
+</body>
+</html>
