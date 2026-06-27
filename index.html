@@ -1901,7 +1901,7 @@ async function loadBracketF2() {
   state.grupos = grupos;
   state.gruposPalpite = gruposPalpite;
 
-  const editavel = !!status.f2Aberta;
+  const editavel = !!status.f2Aberta; const fasesAbertas = status.fasesMataAbertas || []; const faseEditavel = (f) => editavel && fasesAbertas.indexOf(f) >= 0;
   // F2 fica disponível só após fim dos grupos (verificamos se todos os jogos de grupo encerraram)
   const todosGruposEncerraram = jogos
     .filter(j => String(j.fase || '').startsWith('Grupo'))
@@ -1993,12 +1993,12 @@ async function loadBracketF2() {
     ${banner}
     ${explicacao}
 
-    ${renderBracketSecaoF2('ROUND OF 32', '16 JOGOS', r32, palpitesF2, palpitesF1, !editavel)}
-    ${renderBracketSecaoF2('OITAVAS DE FINAL', '8 JOGOS', r16, palpitesF2, palpitesF1, !editavel)}
-    ${renderBracketSecaoF2('QUARTAS DE FINAL', '4 JOGOS', qf, palpitesF2, palpitesF1, !editavel)}
-    ${renderBracketSecaoF2('SEMIFINAIS', '2 JOGOS', sf, palpitesF2, palpitesF1, !editavel)}
-    ${renderBracketSecaoF2('DISPUTA 3º LUGAR', '1 JOGO', d3, palpitesF2, palpitesF1, !editavel)}
-    ${renderBracketSecaoF2('FINAL', '1 JOGO', fi, palpitesF2, palpitesF1, !editavel)}
+    ${renderBracketSecaoF2('ROUND OF 32', '16 JOGOS', r32, palpitesF2, palpitesF1, !faseEditavel('Round of 32'))}
+    ${renderBracketSecaoF2('OITAVAS DE FINAL', '8 JOGOS', r16, palpitesF2, palpitesF1, !faseEditavel('Oitavas'))}
+    ${renderBracketSecaoF2('QUARTAS DE FINAL', '4 JOGOS', qf, palpitesF2, palpitesF1, !faseEditavel('Quartas'))}
+    ${renderBracketSecaoF2('SEMIFINAIS', '2 JOGOS', sf, palpitesF2, palpitesF1, !faseEditavel('Semifinal'))}
+    ${renderBracketSecaoF2('DISPUTA 3º LUGAR', '1 JOGO', d3, palpitesF2, palpitesF1, !faseEditavel('Disputa 3º'))}
+    ${renderBracketSecaoF2('FINAL', '1 JOGO', fi, palpitesF2, palpitesF1, !faseEditavel('Final'))}
 
     ${editavel ? `<button class="save-fab" onclick="salvarBracketF2()">Salvar Palpite Oficial ✓</button>` : ''}
   `;
