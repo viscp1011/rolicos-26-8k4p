@@ -362,6 +362,14 @@
   }
   .bracket-score:focus { outline: none; border-color: var(--gold); }
   .bracket-score:disabled { opacity: 0.5; }
+  .bracket-penalti {
+    font-size: 10px; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.3px;
+    margin-top: 6px; padding: 5px 7px;
+  }
+  .bracket-penalti.req {
+    color: var(--gold); border: 1px dashed var(--gold); background: rgba(255,199,44,0.07);
+  }
+  .bracket-penalti.ok { color: var(--green); border: 1px solid rgba(0,177,95,0.4); }
 
   /* ====== GRUPOS LADO A LADO ====== */
   .group-compare {
@@ -1887,120 +1895,65 @@ async function salvarBracketF1() {
 async function loadBracketF2() {
   const el = document.getElementById('bracketF2');
   showLoadingIfEmpty(el);
-
-  const [jogos, meus, status, grupos, gruposPalpite] = await Promise.all([
+  const [jogos, meus, status, grupos] = await Promise.all([
     state.jogos.length ? Promise.resolve(state.jogos) : cachedApi('getJogos'),
     cachedApi('getMeusPalpites', { email: state.user.email }),
     state.status ? Promise.resolve(state.status) : cachedApi('getStatus'),
-    cachedApi('getGrupos'),
-    cachedApi('getGruposPalpite', { email: state.user.email })
+    cachedApi('getGrupos')
   ]);
   state.jogos = jogos;
   state.meusPalpites = meus;
   state.status = status;
   state.grupos = grupos;
-  state.gruposPalpite = gruposPalpite;
 
-  const editavel = !!status.f2Aberta; const fasesAbertas = status.fasesMataAbertas || []; const faseEditavel = (f) => editavel && fasesAbertas.indexOf(f) >= 0;
-  // F2 fica disponível só após fim dos grupos (verificamos se todos os jogos de grupo encerraram)
+  const fasesAbertas = status.fasesMataAbertas || [];
   const todosGruposEncerraram = jogos
     .filter(j => String(j.fase || '').startsWith('Grupo'))
     .every(j => j.status === 'ENCERRADO');
 
-  // Caso 1: ainda não chegou a hora da F2
-  if (!todosGruposEncerraram && !editavel) {
+  // Nenhuma fase liberada ainda → mensagem única, sem mais nada.
+  if (fasesAbertas.length === 0) {
     el.innerHTML = `
       <h1 class="screen-title">PALPITE OFICIAL</h1>
-      <div class="screen-sub">REFAÇA O MATA-MATA COM OS TIMES REAIS</div>
       <div class="bracket-status closed">
-        <div style="font-size:13px;font-weight:700;">⏳ AGUARDANDO FIM DOS GRUPOS</div>
-        <div style="font-size:11px;margin-top:4px;color:var(--ink-dim);font-family:'JetBrains Mono',monospace;letter-spacing:0.3px;">
-          O Palpite Oficial só abre quando todos os jogos da fase de grupos terminarem (~27/jun). Aí você poderá refazer o bracket com os times que realmente classificaram.
+        <div style="font-size:13px;font-weight:700;">
+          ${todosGruposEncerraram ? '⏳ AGUARDANDO LIBERAÇÃO DA PRÓXIMA FASE' : '⏳ AGUARDANDO FIM DOS GRUPOS'}
         </div>
-      </div>
-      <div class="bracket-legend">
-        <div>📌 Lembrete: o bônus de confronto sempre vale pelo seu <strong>Palpite Antecipado</strong>. Refazer aqui no Oficial só ajusta a pontuação por placar dos jogos do mata-mata.</div>
-      </div>
-    `;
+      </div>`;
     return;
   }
 
-  // Indexa palpites F1 (pra usar como base/pré-preenchimento) e F2 (estado atual)
-  const palpitesF1 = {};
-  (meus.bracketF1 || []).forEach(p => { palpitesF1[String(p['Jogo ID'])] = p; });
   const palpitesF2 = {};
   (meus.bracketF2 || []).forEach(p => { palpitesF2[String(p['Jogo ID'])] = p; });
+  const palpitesF1 = {};  // mantido só por compat. de assinatura; não é mais exibido
+  (meus.bracketF1 || []).forEach(p => { palpitesF1[String(p['Jogo ID'])] = p; });
 
-  // Estratégia de pré-preenchimento da F2:
-  // - Se já tem palpite F2 salvo → usa F2
-  // - Se NÃO tem F2 mas tem F1 → usa F1 como base (mas só onde o time da F1 bate com o time real)
-  const draft = editavel ? state.bracketDraftF2 : null;
-  const resolver = makeResolverPlaceholder(grupos, palpitesF2, draft, false);
+  const resolver = makeResolverPlaceholder(grupos, palpitesF2, state.bracketDraftF2, false);
 
-  const r32 = enriqueceJogosBracket(jogos.filter(j => j.fase === 'Round of 32').sort((a, b) => Number(a.id) - Number(b.id)), resolver);
-  const r16 = enriqueceJogosBracket(jogos.filter(j => j.fase === 'Oitavas').sort((a, b) => Number(a.id) - Number(b.id)), resolver);
-  const qf = enriqueceJogosBracket(jogos.filter(j => j.fase === 'Quartas').sort((a, b) => Number(a.id) - Number(b.id)), resolver);
-  const sf = enriqueceJogosBracket(jogos.filter(j => j.fase === 'Semifinal').sort((a, b) => Number(a.id) - Number(b.id)), resolver);
-  const fi = enriqueceJogosBracket(jogos.filter(j => j.fase === 'Final'), resolver);
-  const d3 = enriqueceJogosBracket(jogos.filter(j => j.fase === 'Disputa 3º'), resolver);
+  // Define ordem/título das fases; só renderiza as que estão ABERTAS.
+  const fasesDef = [
+    { fase: 'Round of 32', titulo: 'ROUND OF 32',       sort: true  },
+    { fase: 'Oitavas',     titulo: 'OITAVAS DE FINAL',  sort: true  },
+    { fase: 'Quartas',     titulo: 'QUARTAS DE FINAL',  sort: true  },
+    { fase: 'Semifinal',   titulo: 'SEMIFINAIS',        sort: true  },
+    { fase: 'Disputa 3º',  titulo: 'DISPUTA 3º LUGAR',  sort: false },
+    { fase: 'Final',       titulo: 'FINAL',             sort: false }
+  ];
 
-  const totalF1 = Object.keys(palpitesF1).length;
-  const totalF2 = Object.keys(palpitesF2).length;
-
-  let banner, explicacao;
-  if (editavel) {
-    banner = `
-      <div class="bracket-status open f2">
-        <div style="font-size:13px;font-weight:700;">🔓 PALPITE OFICIAL ABERTO — refaça com os classificados reais</div>
-        <div style="font-size:11px;margin-top:4px;color:var(--ink-dim);font-family:'JetBrains Mono',monospace;letter-spacing:0.3px;">
-          Antecipado: ${totalF1}/32 · Oficial: ${totalF2}/32 · você pode editar várias vezes durante a janela
-        </div>
-      </div>
-    `;
-    explicacao = `
-      <div class="bracket-legend">
-        <div style="font-weight:700;margin-bottom:6px;">Como funciona o Palpite Oficial</div>
-        <div>1. Os times do Round of 32 agora são os <strong>classificados REAIS</strong> da fase de grupos.</div>
-        <div>2. Onde você acertou no Palpite Antecipado, o time aparece com <strong style="color:var(--green)">fundo verde</strong> (já vem pré-marcado como vencedor).</div>
-        <div>3. Onde errou, o time foi substituído pelo correto, mas você precisa marcar o vencedor manualmente.</div>
-        <div>4. Pode editar quantas vezes quiser durante a janela.</div>
-        <hr style="border:none;border-top:1px solid var(--border);margin:10px 0;">
-        <div style="font-weight:700;margin-bottom:6px;">O que vale o Palpite Oficial?</div>
-        <div>• <strong>Pontuação por placar</strong>: placar exato 10 pts / vencedor+saldo 7 pts / só vencedor 5 pts</div>
-        <div>• O bônus de confronto continua vindo do seu Palpite Antecipado original (não muda).</div>
-      </div>
-    `;
-  } else {
-    banner = `
-      <div class="bracket-status closed">
-        <div style="font-size:13px;font-weight:700;">🔒 PALPITE OFICIAL ENCERRADO</div>
-        <div style="font-size:11px;margin-top:4px;color:var(--ink-dim);font-family:'JetBrains Mono',monospace;letter-spacing:0.3px;">
-          ${totalF2 > 0 ? `Você refez ${totalF2}/32 confrontos` : 'Você não fez o Palpite Oficial — vale só o bônus do seu Palpite Antecipado.'}
-        </div>
-      </div>
-    `;
-    explicacao = `
-      <div class="bracket-legend">
-        <div>📋 A janela do Palpite Oficial fechou. ${totalF2 > 0 ? 'Sua pontuação por placar é calculada com base no Palpite Oficial.' : 'Como você não fez o Palpite Oficial, ganha só o bônus de confronto do Antecipado (sem pontuação por placar do mata-mata).'}</div>
-      </div>
-    `;
-  }
+  let secoesHtml = '';
+  fasesDef.forEach(def => {
+    if (fasesAbertas.indexOf(def.fase) < 0) return;          // ← só as fases liberadas
+    let arr = jogos.filter(j => j.fase === def.fase);
+    if (def.sort) arr.sort((a, b) => Number(a.id) - Number(b.id));
+    arr = enriqueceJogosBracket(arr, resolver);
+    const contador = `${arr.length} JOGO${arr.length > 1 ? 'S' : ''}`;
+    secoesHtml += renderBracketSecaoF2(def.titulo, contador, arr, palpitesF2, palpitesF1, false);
+  });
 
   el.innerHTML = `
     <h1 class="screen-title">PALPITE OFICIAL</h1>
-    <div class="screen-sub">BRACKET COM TIMES REAIS · VALE A PONTUAÇÃO POR PLACAR</div>
-
-    ${banner}
-    ${explicacao}
-
-    ${renderBracketSecaoF2('ROUND OF 32', '16 JOGOS', r32, palpitesF2, palpitesF1, !faseEditavel('Round of 32'))}
-    ${renderBracketSecaoF2('OITAVAS DE FINAL', '8 JOGOS', r16, palpitesF2, palpitesF1, !faseEditavel('Oitavas'))}
-    ${renderBracketSecaoF2('QUARTAS DE FINAL', '4 JOGOS', qf, palpitesF2, palpitesF1, !faseEditavel('Quartas'))}
-    ${renderBracketSecaoF2('SEMIFINAIS', '2 JOGOS', sf, palpitesF2, palpitesF1, !faseEditavel('Semifinal'))}
-    ${renderBracketSecaoF2('DISPUTA 3º LUGAR', '1 JOGO', d3, palpitesF2, palpitesF1, !faseEditavel('Disputa 3º'))}
-    ${renderBracketSecaoF2('FINAL', '1 JOGO', fi, palpitesF2, palpitesF1, !faseEditavel('Final'))}
-
-    ${editavel ? `<button class="save-fab" onclick="salvarBracketF2()">Salvar Palpite Oficial ✓</button>` : ''}
+    ${secoesHtml}
+    <button class="save-fab" onclick="salvarBracketF2()">Salvar Palpite Oficial ✓</button>
   `;
 }
 
@@ -2019,146 +1972,132 @@ function renderBracketSecaoF2(titulo, meta, jogosDaFase, palpitesF2, palpitesF1,
  * - Placar e vencedor: usa F2 se existir, senão F1 (como ponto de partida) */
 function renderBracketMatchF2(j, palpitesF2, palpitesF1, locked) {
   const palpiteF2 = palpitesF2[String(j.id)];
-  const palpiteF1 = palpitesF1[String(j.id)];
-
-  // Times reais (já resolvidos via grupos reais)
   const codA = j.timeAEfetivo || j.timeA;
   const codB = j.timeBEfetivo || j.timeB;
   const phA = isPlaceholder(codA);
   const phB = isPlaceholder(codB);
 
-  // Quais times o usuário palpitou na F1 pra esse jogo?
-  const f1TimeA = palpiteF1 ? palpiteF1['Time A previsto'] : null;
-  const f1TimeB = palpiteF1 ? palpiteF1['Time B previsto'] : null;
-  // Acertou o time real no slot A ou B?
-  const acertouA = f1TimeA === codA || f1TimeB === codA;
-  const acertouB = f1TimeA === codB || f1TimeB === codB;
-
-  // Estado: F2 (se existir) tem prioridade sobre F1 como base
-  let vencedorPrevisto, placar, placarA, placarB;
+  // Estado inicial: rascunho > palpite oficial salvo > vazio (NÃO herda da F1).
+  let vencedorPrevisto = null, placarA = '', placarB = '';
   if (palpiteF2) {
-    vencedorPrevisto = palpiteF2['Vencedor previsto'];
-    placar = String(palpiteF2['Placar (a×b)'] || '');
-    [placarA, placarB] = placar.includes('×') ? placar.split('×') : ['', ''];
-  } else if (palpiteF1) {
-    // Usa F1 como base: vencedor SÓ vale se o time previsto realmente é um dos dois reais
-    const vF1 = palpiteF1['Vencedor previsto'];
-    if (vF1 === codA || vF1 === codB) vencedorPrevisto = vF1;
-    placar = String(palpiteF1['Placar (a×b)'] || '');
-    // Se a ordem F1 difere da F2 (A/B trocou), inverte placares
-    if (placar.includes('×')) {
-      const [pA, pB] = placar.split('×');
-      if (f1TimeA === codA) { placarA = pA; placarB = pB; }
-      else if (f1TimeA === codB) { placarA = pB; placarB = pA; }
-      else { placarA = ''; placarB = ''; }
-    } else {
-      placarA = placarB = '';
-    }
-  } else {
-    vencedorPrevisto = null;
-    placarA = placarB = '';
+    vencedorPrevisto = palpiteF2['Vencedor previsto'] || null;
+    const placar = String(palpiteF2['Placar (a×b)'] || '');
+    if (placar.includes('×')) { const p = placar.split('×'); placarA = p[0]; placarB = p[1]; }
   }
-
-  // Draft em memória (edições não salvas)
   const draft = state.bracketDraftF2 && state.bracketDraftF2[String(j.id)];
-  if (draft && !locked) {
-    vencedorPrevisto = draft.vencedor;
-    placarA = draft.placarA;
-    placarB = draft.placarB;
+  if (draft && !locked) { vencedorPrevisto = draft.vencedor; placarA = draft.placarA; placarB = draft.placarB; }
+
+  // "Quem avança": decisivo = automático pelo placar; empate = pick salvo (pênaltis).
+  const aNum = (placarA !== '' && placarA != null) ? Number(placarA) : null;
+  const bNum = (placarB !== '' && placarB != null) ? Number(placarB) : null;
+  let aWin = false, bWin = false;
+  if (aNum != null && bNum != null && aNum !== bNum) {
+    aWin = aNum > bNum; bWin = !aWin;
+  } else if (vencedorPrevisto) {
+    aWin = vencedorPrevisto === codA; bWin = vencedorPrevisto === codB;
   }
 
-  const aSelected = vencedorPrevisto === codA;
-  const bSelected = vencedorPrevisto === codB;
-
-  // Classes especiais: se F1 acertou o time, marca o botão com classe .f1-correct (fundo verde sutil)
-  const classA = `${aSelected ? 'winner' : (acertouA ? 'f1-correct' : '')} ${phA ? 'placeholder' : ''}`.trim();
-  const classB = `${bSelected ? 'winner' : (acertouB ? 'f1-correct' : '')} ${phB ? 'placeholder' : ''}`.trim();
-
-  // Label com ✓ se F1 acertou
-  const labelA = phA ? nomeFor(codA) : `${nomeFor(codA)}${acertouA ? ' <span class="resolved-mark" title="você acertou este time na F1">✓</span>' : ''}`;
-  const labelB = phB ? nomeFor(codB) : `${nomeFor(codB)}${acertouB ? ' <span class="resolved-mark" title="você acertou este time na F1">✓</span>' : ''}`;
-
-  // Linha de referência F1: o que ele palpitou originalmente
-  let referenciaF1 = '';
-  if (palpiteF1) {
-    const acertouAmbos = acertouA && acertouB;
-    const placarF1 = palpiteF1['Placar (a×b)'] || '';
-    const venceuF1 = nomeFor(palpiteF1['Vencedor previsto']);
-    referenciaF1 = `
-      <div class="bracket-f1-ref ${acertouAmbos ? 'acertou' : ''}">
-        <span class="bracket-f1-label">F1:</span>
-        ${acertouAmbos
-          ? `<span style="color:var(--gold);">✓ confronto acertado</span>`
-          : `<span style="color:var(--ink-dim);">${nomeFor(palpiteF1['Time A previsto'])} × ${nomeFor(palpiteF1['Time B previsto'])}</span>`
-        }
-        <span style="color:var(--ink-dim);margin-left:auto;">vencedor: ${venceuF1}${placarF1 ? ' · ' + placarF1 : ''}</span>
-      </div>
-    `;
-  }
+  const classA = `${aWin ? 'winner' : ''} ${phA ? 'placeholder' : ''}`.trim();
+  const classB = `${bWin ? 'winner' : ''} ${phB ? 'placeholder' : ''}`.trim();
 
   return `
     <div class="bracket-match" data-jogo-id="${j.id}" data-time-a="${codA}" data-time-b="${codB}" data-mode="F2">
       <div class="bracket-meta">JOGO ${j.id}</div>
       <div class="bracket-row">
-        <button class="bracket-team ${classA}"
-                onclick="toggleBracketWinnerF2(${j.id}, 'A')"
-                ${locked || phA ? 'disabled' : ''}>
-          ${flagFor(codA)}
-          <span class="bracket-team-name">${labelA}</span>
+        <button class="bracket-team ${classA}" onclick="toggleBracketWinnerF2(${j.id}, 'A')" ${locked || phA ? 'disabled' : ''}>
+          ${flagFor(codA)}<span class="bracket-team-name">${nomeFor(codA)}</span>
         </button>
-        <input class="bracket-score" type="number" min="0" max="9"
-               value="${placarA}" placeholder="-"
-               data-jogo="${j.id}" data-lado="A"
-               onchange="onBracketScoreChangeF2()"
-               ${locked ? 'disabled' : ''}>
+        <input class="bracket-score" type="number" min="0" max="20" value="${placarA}" placeholder="-"
+               inputmode="numeric" data-jogo="${j.id}" data-lado="A"
+               oninput="onBracketScoreChangeF2(${j.id})" ${locked ? 'disabled' : ''}>
       </div>
       <div class="bracket-row">
-        <button class="bracket-team ${classB}"
-                onclick="toggleBracketWinnerF2(${j.id}, 'B')"
-                ${locked || phB ? 'disabled' : ''}>
-          ${flagFor(codB)}
-          <span class="bracket-team-name">${labelB}</span>
+        <button class="bracket-team ${classB}" onclick="toggleBracketWinnerF2(${j.id}, 'B')" ${locked || phB ? 'disabled' : ''}>
+          ${flagFor(codB)}<span class="bracket-team-name">${nomeFor(codB)}</span>
         </button>
-        <input class="bracket-score" type="number" min="0" max="9"
-               value="${placarB}" placeholder="-"
-               data-jogo="${j.id}" data-lado="B"
-               onchange="onBracketScoreChangeF2()"
-               ${locked ? 'disabled' : ''}>
+        <input class="bracket-score" type="number" min="0" max="20" value="${placarB}" placeholder="-"
+               inputmode="numeric" data-jogo="${j.id}" data-lado="B"
+               oninput="onBracketScoreChangeF2(${j.id})" ${locked ? 'disabled' : ''}>
       </div>
-      ${referenciaF1}
-    </div>
-  `;
+      <div class="bracket-penalti" data-penalti="${j.id}" style="display:none;"></div>
+    </div>`;
 }
 
+// Clique no time = "quem passa nos pênaltis". No placar decisivo o vencedor é
+// automático, então o clique não muda nada (a sincronização reforça o vencedor do placar).
 function toggleBracketWinnerF2(jogoId, lado) {
-  const card = document.querySelector(`.bracket-match[data-jogo-id="${jogoId}"][data-mode="F2"]`);
+  const card = document.querySelector(`.bracket-match[data-mode="F2"][data-jogo-id="${jogoId}"]`);
   if (!card) return;
-  const buttons = card.querySelectorAll('.bracket-team');
-  const idx = lado === 'A' ? 0 : 1;
-  if (buttons[idx].classList.contains('winner')) {
-    buttons[idx].classList.remove('winner');
-  } else {
-    buttons[0].classList.remove('winner');
-    buttons[1].classList.remove('winner');
-    buttons[idx].classList.add('winner');
-  }
-  propagarBracketF2();
+  const inputA = card.querySelector('input[data-lado="A"]');
+  const inputB = card.querySelector('input[data-lado="B"]');
+  const a = (inputA && inputA.value !== '') ? Number(inputA.value) : null;
+  const b = (inputB && inputB.value !== '') ? Number(inputB.value) : null;
+  const botoes = card.querySelectorAll('.bracket-team');
+  const btnA = botoes[0], btnB = botoes[1];
+
+  // Placar decisivo: clique é ignorado (vencedor segue o placar).
+  if (a != null && b != null && a !== b) { sincronizarCardF2(jogoId); return; }
+
+  // Empate ou incompleto: o clique escolhe quem passa.
+  const ehA = (lado === 'A');
+  btnA.classList.toggle('winner', ehA);
+  btnB.classList.toggle('winner', !ehA);
+  sincronizarCardF2(jogoId);
 }
 
-function onBracketScoreChangeF2() {
-  if (!state.bracketDraftF2) state.bracketDraftF2 = {};
-  document.querySelectorAll('.bracket-match[data-mode="F2"]').forEach(card => {
-    const jogoId = card.dataset.jogoId;
-    const inputs = card.querySelectorAll('.bracket-score');
-    if (!state.bracketDraftF2[jogoId]) {
-      state.bracketDraftF2[jogoId] = {
-        timeA: card.dataset.timeA, timeB: card.dataset.timeB,
-        vencedor: null, placarA: '', placarB: ''
-      };
+// Lógica central de um card do Palpite Oficial: define "quem avança" e o aviso de pênaltis,
+// e atualiza o rascunho. Decisivo → vencedor automático. Empate → exige o pick.
+function sincronizarCardF2(jogoId) {
+  const card = document.querySelector(`.bracket-match[data-mode="F2"][data-jogo-id="${jogoId}"]`);
+  if (!card) return;
+  const inputA = card.querySelector('input[data-lado="A"]');
+  const inputB = card.querySelector('input[data-lado="B"]');
+  const botoes = card.querySelectorAll('.bracket-team');
+  const btnA = botoes[0], btnB = botoes[1];
+  const hint = card.querySelector('[data-penalti]');
+  const timeA = card.dataset.timeA, timeB = card.dataset.timeB;
+
+  const a = (inputA && inputA.value !== '') ? Number(inputA.value) : null;
+  const b = (inputB && inputB.value !== '') ? Number(inputB.value) : null;
+
+  let vencedor = null;
+  if (a != null && b != null && a !== b) {
+    // Placar decisivo → vencedor automático (ignora cliques)
+    vencedor = a > b ? timeA : timeB;
+    btnA.classList.toggle('winner', vencedor === timeA);
+    btnB.classList.toggle('winner', vencedor === timeB);
+    if (hint) hint.style.display = 'none';
+  } else if (a != null && b != null && a === b) {
+    // Empate → quem passa é o time clicado (pênaltis)
+    if (btnA.classList.contains('winner')) vencedor = timeA;
+    else if (btnB.classList.contains('winner')) vencedor = timeB;
+    if (hint) {
+      if (vencedor) {
+        hint.className = 'bracket-penalti ok';
+        hint.innerHTML = `⚽ pênaltis: <strong>${nomeFor(vencedor)}</strong> passa`;
+      } else {
+        hint.className = 'bracket-penalti req';
+        hint.innerHTML = `⚽ empate — toque em quem passa nos pênaltis`;
+      }
+      hint.style.display = '';
     }
-    state.bracketDraftF2[jogoId].placarA = inputs[0] ? inputs[0].value : '';
-    state.bracketDraftF2[jogoId].placarB = inputs[1] ? inputs[1].value : '';
-  });
+  } else {
+    // Incompleto → sem destaque automático
+    btnA.classList.remove('winner');
+    btnB.classList.remove('winner');
+    if (hint) hint.style.display = 'none';
+  }
+
+  state.bracketDraftF2 = state.bracketDraftF2 || {};
+  state.bracketDraftF2[String(jogoId)] = {
+    vencedor: vencedor,
+    placarA: (inputA && inputA.value !== '') ? inputA.value : '',
+    placarB: (inputB && inputB.value !== '') ? inputB.value : ''
+  };
+}
+
+function onBracketScoreChangeF2(jogoId) {
+  sincronizarCardF2(jogoId);
 }
 
 async function propagarBracketF2() {
@@ -2187,36 +2126,58 @@ async function propagarBracketF2() {
 async function salvarBracketF2() {
   const cards = document.querySelectorAll('.bracket-match[data-mode="F2"]');
   const confrontos = [];
+  const pendentes = [];
   cards.forEach(card => {
+    const inputA = card.querySelector('input[data-lado="A"]');
+    const inputB = card.querySelector('input[data-lado="B"]');
+    if (!inputA || !inputB || inputA.disabled || inputB.disabled) return;  // travado/placeholder
+
     const jogoId = card.dataset.jogoId;
     const timeA = card.dataset.timeA;
     const timeB = card.dataset.timeB;
-    const buttons = card.querySelectorAll('.bracket-team');
-    const aWinner = buttons[0].classList.contains('winner');
-    const bWinner = buttons[1].classList.contains('winner');
+    const a = inputA.value !== '' ? Number(inputA.value) : null;
+    const b = inputB.value !== '' ? Number(inputB.value) : null;
+    const botoes = card.querySelectorAll('.bracket-team');
+    const aWin = botoes[0].classList.contains('winner');
+    const bWin = botoes[1].classList.contains('winner');
+
+    if (a == null && b == null) return;                 // card vazio: ignora
+    if (a == null || b == null) { pendentes.push(jogoId); return; }  // só um placar
+
     let vencedor = null;
-    if (aWinner) vencedor = timeA;
-    else if (bWinner) vencedor = timeB;
-    if (!vencedor) return;
-    const inputA = card.querySelector('input[data-lado="A"]');
-    const inputB = card.querySelector('input[data-lado="B"]');
-    const placarA = inputA && inputA.value !== '' ? Number(inputA.value) : null;
-    const placarB = inputB && inputB.value !== '' ? Number(inputB.value) : null;
-    confrontos.push({ jogoId, timeA, timeB, vencedor, placarA, placarB });
+    if (a > b) vencedor = timeA;
+    else if (b > a) vencedor = timeB;
+    else {                                              // empate → precisa do pick
+      vencedor = aWin ? timeA : (bWin ? timeB : null);
+      if (!vencedor) { pendentes.push(jogoId); return; }
+    }
+    confrontos.push({ jogoId, timeA, timeB, vencedor, placarA: a, placarB: b });
   });
 
-  if (confrontos.length === 0) { toast('Marque pelo menos um vencedor', true); return; }
+  if (pendentes.length) {
+    toast(`Falta completar ${pendentes.length} jogo(s): placar dos dois lados e, no empate, quem passa nos pênaltis`, true);
+    const alvo = document.querySelector(`.bracket-match[data-jogo-id="${pendentes[0]}"]`);
+    if (alvo) alvo.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+  if (confrontos.length === 0) { toast('Preencha pelo menos um jogo', true); return; }
 
   const fab = document.querySelector('#bracketF2 .save-fab');
-  if (fab) { fab.disabled = true; fab.textContent = `Salvando ${confrontos.length} palpites...`; }
+  if (fab) { fab.disabled = true; fab.textContent = `Salvando ${confrontos.length}...`; }
   try {
     const result = await api('salvarBracket', { email: state.user.email, fase: 'F2', confrontos });
-    toast(`Palpite Oficial salvo: ${result.count} palpite(s)`);
+    if (result.ignored && result.ignored > 0) {
+      toast(`Salvos ${result.count}. ${result.ignored} não entraram (fase fechada ou jogo já iniciado).`, true);
+    } else {
+      toast(`Palpite Oficial salvo: ${result.count} jogo(s) ✓`);
+    }
     invalidateCache(['getMeusPalpites', 'getRanking']);
     state.meusPalpites = await cachedApi('getMeusPalpites', { email: state.user.email }, { force: true });
     state.bracketDraftF2 = null;
-  } catch (err) { /* toast já mostrado */ }
-  finally {
+    await loadBracketF2();   // re-render limpo já com o que foi salvo
+  } catch (err) {
+    /* o api() já mostra o toast de erro */
+  } finally {
     if (fab) { fab.disabled = false; fab.textContent = 'Salvar Palpite Oficial ✓'; }
   }
 }
